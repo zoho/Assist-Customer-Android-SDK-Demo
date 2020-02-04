@@ -1,123 +1,88 @@
 package com.zoho.assist.customer.demo
 
 import android.annotation.SuppressLint
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import java.util.*
 import android.widget.*
-import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationCompat
+import androidx.databinding.DataBindingUtil
 import com.zoho.assist.customer.AssistSession
-import com.zoho.assist.customer.base.BaseActivity
-import com.zoho.assist.customer.model.ChatModel
-import com.zoho.assist.customer.demo.R
+import com.zoho.assist.customer.chat.viewmodel.ChatViewModel
 import com.zoho.assist.customer.demo.databinding.ActivityMainBinding
 import com.zoho.assist.customer.util.Constants
 
 
 @SuppressLint("Registered")
-class MainActivity : BaseActivity<ActivityMainBinding>() {
+class MainActivity : AppCompatActivity() {
 
-    lateinit var dialog: AlertDialog
-
-    /**
-     * Returns the layout resource of the activity
-     */
-    override fun getContentView(): Int {
-        return R.layout.activity_main
-    }
-
-    /**
-     * Returns the app icon
-     */
-    override fun getLauncherIcon(): Int {
-        return R.mipmap.ic_launcher
-    }
-
-
-
-    /**
-     * To perform any operation when session gets connected successfully
-     */
-    override fun onSessionStarted() {
-        binding.helloText.text = ("\nStarting Session")//no i18n
-        binding.closeSession.isEnabled = true
-        binding.startShare.isEnabled = false
-        binding.stopShare.isEnabled = true
-        binding.sendMessage.isEnabled = true
-        binding.startSession.isEnabled = false
-
-        if (::dialog.isLateinit) {
-            if (::dialog.isInitialized) {
-                closeCustomDialog(dialog)
-            }
-        }
-    }
-
-    /**
-     * To perform any operation after session closed
-     */
-    override fun onSessionClosed() {
-        binding.helloText.append("\n Session Closed")//no i18n
-    }
-
-    /**
-     * To perform any operation when any technician leaves or gets lost from the session
-     */
-    override fun onConnectionDown() {
-        binding.helloText.append("\n Connection Lost")//no i18n
-    }
-
-    /**
-     * param viewersCount
-     *
-     * To perform any operation when any technician joins the session
-     */
-    override fun onConnectionUp(viewersCount: Int) {
-        binding.helloText.append("\n Technicians:: $viewersCount")//no i18n
-    }
-
-    /**
-     * param - msg
-     * To show any message
-     */
-    override fun showToast(msg: String) {
-    }
-
-    /**
-     * param - isAccepted
-     *  To perform any operation during a switch role request based on the acceptance state
-     */
-
-    override fun onSwitchRoles(isAccepted: Boolean) {
-        binding.helloText.append("\n Switched Roles:: $isAccepted")//no i18n
-    }
-
-    /**
-     * param - isSharing
-     * To perform any operation when customer toggles the screen sharing status
-     *
-     */
-    override fun onStartStopShare(isSharing: Boolean) {
-    }
-
-    /**
-     *  param - chatModel
-     * To manipulate the chat message object for addition to the chat history list
-     */
-    override fun onReceivedMessage(chatModel: ChatModel) {
-        binding.helloText.append("\nReceived message:: " + chatModel.msg)//no i18n
-    }
-
+    lateinit var viewDataBinding: ActivityMainBinding
 
     private lateinit var callback: ISessionCallbacks
+    var sessionKey=""
 
-    override fun onViewCreate(savedInstanceState: Bundle?) {
-        callback = ISessionCallbacks(this, binding)
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+    }
+
+        override fun onCreate(savedInstanceState: Bundle?) {
+            super.onCreate(savedInstanceState)
+            viewDataBinding = DataBindingUtil.setContentView(this,  R.layout.activity_main)
+
+            /**
+             * SetContext
+             */
+            AssistSession.INSTANCE.setContext(this.application.applicationContext)
+            callback = ISessionCallbacks(this, viewDataBinding)
+            AssistSession.INSTANCE.onCreate(this,callback)
+
+
+            onViewCreate()
+            viewDataBinding.executePendingBindings()
+        }
+
+
+        override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+            super.onActivityResult(requestCode, resultCode, data)
+            data?.let { AssistSession.INSTANCE.onActivityResult(requestCode,resultCode, it) }
+        }
+
+    /**
+     * ===============================================================================
+     * onStop(), onResume() are needed only when the Floating Head feature is enabled
+     *
+     *
+     */
+
+    /**
+     * Called when the app is no longer visible to the user
+     */
+
+    override fun onStop() {
+        super.onStop()
+        AssistSession.INSTANCE.onStop()
+    }
+
+    /**
+     *Called after your app starts interacting with the user. This is an indicator that the app became active and visible to the user.
+     */
+    override fun onResume() {
+        super.onResume()
+        AssistSession.INSTANCE.onResume()
+    }
+
+
+    private fun onViewCreate() {
         if(intent!=null) {
 
-
-            if (intent.getStringExtra(Constants.SESSION_KEY).isEmpty()) {
+            if (intent.getStringExtra(Constants.SESSION_KEY).isNullOrEmpty()&& !AssistSession.INSTANCE.isSessionAlive()) {
                 joinSessionActivity()
 
             } else if(intent.action==null){
@@ -127,28 +92,20 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         }
 
         //click listeners
-        binding.closeSession.setOnClickListener {
-            onCloseSession(object : ICloseCallback {
-                override fun onDone() {
-                    binding.startShare.isEnabled = false
-                    binding.stopShare.isEnabled = false
-                    binding.sendMessage.isEnabled = false
-                    binding.startSession.isEnabled = true
-                    binding.closeSession.isEnabled = false
-                    sessionKey = ""
-                    binding.helloText.append("\nSession Stopped")//no i18n
+        viewDataBinding.closeSession.setOnClickListener {
+            AssistSession.INSTANCE.onCustomerEndSession()
+                    viewDataBinding.startShare.isEnabled = false
+                    viewDataBinding.stopShare.isEnabled = false
+                    viewDataBinding.sendMessage.isEnabled = false
+                    viewDataBinding.startSession.isEnabled = true
+                    viewDataBinding.closeSession.isEnabled = false
+                    intent.putExtra(Constants.SESSION_KEY,"")
+                    viewDataBinding.helloText.append("\nSession Stopped")//no i18n
                     joinSessionActivity()
-                    Toast.makeText(this@MainActivity, "Closed the session", Toast.LENGTH_SHORT)
-                        .show()
-                }
-
-                override fun onCancel() {
-                }
-
-            })
+                    Toast.makeText(this@MainActivity, "Closed the session", Toast.LENGTH_SHORT).show()//no i18n
 
         }
-        binding.startSession.setOnClickListener(View.OnClickListener {
+        viewDataBinding.startSession.setOnClickListener(View.OnClickListener {
 
             if (intent.getStringExtra(Constants.SESSION_KEY).isEmpty()) {
                 joinSessionActivity()
@@ -160,31 +117,27 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
 
         })
 
-        binding.startShare.setOnClickListener(View.OnClickListener {
+        viewDataBinding.startShare.setOnClickListener(View.OnClickListener {
             //to restart the screen sharing
-            onStartShare()
-            binding.helloText.append("\n Restart Sharing")//no i18n
-            binding.startShare.isEnabled = false
-            binding.stopShare.isEnabled = true
+            AssistSession.INSTANCE.onStartShare()
+            viewDataBinding.helloText.append("\n Restart Sharing")//no i18n
+            viewDataBinding.startShare.isEnabled = false
+            viewDataBinding.stopShare.isEnabled = true
         })
 
-        binding.stopShare.setOnClickListener(View.OnClickListener {
+        viewDataBinding.stopShare.setOnClickListener(View.OnClickListener {
             //to stop the screen sharing
-            onStopShare()
-            binding.helloText.append("\nStop Sharing")//no i18n
-            binding.stopShare.isEnabled = false
-            binding.startShare.isEnabled = true
+            AssistSession.INSTANCE.onStopShare()
+            viewDataBinding.helloText.append("\nStop Sharing")//no i18n
+            viewDataBinding.stopShare.isEnabled = false
+            viewDataBinding.startShare.isEnabled = true
         })
 
-        binding.sendMessage.setOnClickListener(View.OnClickListener {
+        viewDataBinding.sendMessage.setOnClickListener(View.OnClickListener {
             //send a chat message to the viewers
-            binding.helloText.append("\nSending message:: " + Date().toString())//no i18n
+            viewDataBinding.helloText.append("\nSending message:: " + Date().toString())//no i18n
             AssistSession.INSTANCE.onSendMessage("message:: " + Date().toString())//no i18n
         })
-//        binding.startSession.visibility = View.GONE
-
-
-
     }
 
 
@@ -193,53 +146,81 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     private fun joinSessionActivity() {
         startActivity( Intent(this@MainActivity,JoinActivity::class.java))
         finish()
-
     }
 
 
     private fun onStartSession(key: String, authToken: String) {
-        //Assist Agent init
         sessionKey=key
+
+        //Assist Agent init
         AssistSession.INSTANCE
-            .setCallbacks(callback)//pass over an instance of class implementing AssistSessionCallbacks.
+            .setCallbacks(callback)   //pass over an instance of class implementing SessionCallbacks.
             // All events will be triggered here. (In Background thread)
-            .setUserName("Guest") // share username - Default valus is Guest
-            .setUserEmail("guest@zoho.com")// email - Default value is Guest
-            .setToken(authToken)
-            .onOverlayFloating(MainActivity::class.java,R.drawable.assist_flat) //  drawable / -1
-            .init(this, sessionKey) //this represent Activity Context,
+            .setCustomerDetails("guest","email@emailcom") // share username and userEmail - Default value is Guest
+            .setAuthToken(authToken )
+            .enableFloatingHead(false)
+            .shareScreenOnStart(true)
+            .downloadAddonOnStart(true)
+            .setKeepAliveNotification(getNotification()) // Optional
+            .start(key,MainActivity::class.java,R.drawable.assist_flat) //this represent Activity Context,
+    }
+
+    private fun getNotification(): Notification? {
+        val channelId = "channelId"
+        val channelName ="channelName"
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val serviceChannel = NotificationChannel(
+                channelId,
+                channelName,
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
+
+            val manager = getSystemService(NotificationManager::class.java)
+            manager!!.createNotificationChannel(serviceChannel)
+        }
+
+        val notificationIntent = Intent(this, MainActivity::class.java)
+        notificationIntent.action = Constants.MAIN_ACTION
+        notificationIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        val pendingIntent = PendingIntent.getActivity(this,  Constants.NOTIFICATION_ID.PENDING_INTENT_ID, notificationIntent,  PendingIntent.FLAG_UPDATE_CURRENT)
+        val title= String.format( getApplicationName())
+        val  message=  String.format("%s is currently running and the technician can see whatever is displayed on your screen",  getApplicationName())
+        return NotificationCompat.Builder(this, channelId)
+            .setContentTitle(title)
+            .setContentText(message)
+            .setSmallIcon(com.zoho.assist.customer.R.drawable.assist_flat)
+            .setContentIntent(pendingIntent)
+            .build()
+    }
+    private fun getApplicationName(): String {
+        return try {
+            val applicationInfo = applicationInfo
+            val stringId = applicationInfo.labelRes
+            if (stringId == 0) applicationInfo.nonLocalizedLabel.toString() else getString(stringId)
+        }catch (ex:Exception){
+            ""
+        }
     }
 
 
 
 
     override fun onBackPressed() {
-        binding.helloText.text = ("\nBack pressed")//no i18n
-        if(sessionKey.isNullOrEmpty()) {
+        viewDataBinding.helloText.text = (" Back Pressed")//no i18n
+        if(!AssistSession.INSTANCE.isSessionAlive()) {
             super.onBackPressed()
         }else{
-            onCloseSession(object:ICloseCallback{
-                override fun onDone() {
-                    if (::dialog.isLateinit) {
-                        binding.startShare.isEnabled = false
-                        binding.stopShare.isEnabled = false
-                        binding.sendMessage.isEnabled = false
-                        binding.startSession.isEnabled = true
-                        binding.closeSession.isEnabled = false
-                        sessionKey = ""
-                        binding.helloText.append("\nSession Stopped")//no i18n
-                        joinSessionActivity()
-                        binding.startSession.visibility = View.GONE
-                        finish()
-                    }
-
-                }
-
-                override fun onCancel() {
-
-                }
-
-            })
+            AssistSession.INSTANCE.onCustomerEndSession()
+                    viewDataBinding.startShare.isEnabled = false
+                    viewDataBinding.stopShare.isEnabled = false
+                    viewDataBinding.sendMessage.isEnabled = false
+                    viewDataBinding.startSession.isEnabled = true
+                    viewDataBinding.closeSession.isEnabled = false
+                    intent.putExtra("session_key","")
+                    viewDataBinding.helloText.append("\nSession Stopped")//no i18n
+                    joinSessionActivity()
+                    viewDataBinding.startSession.visibility = View.GONE
+                    finish()
         }
 
     }
