@@ -6,19 +6,21 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.zoho.assist.customer.AssistSession
 import com.zoho.assist.customer.SessionCallbacks
+import com.zoho.assist.customer.SessionStartFailure
 import com.zoho.assist.customer.demo.databinding.ActivityMainBinding
 import com.zoho.assist.customer.model.ChatModel
 
 
-class ISessionCallbacks(private val activity: Activity, private val binding: ActivityMainBinding) :SessionCallbacks {
-
+class ISessionCallbacks(private val activity: Activity, private val binding: ActivityMainBinding) :
+    SessionCallbacks {
 
     lateinit var dialog: AlertDialog
+
     /**
      *   param - response
      *   To perform any operation using the response from validating the token and session key
      */
-    override fun onValidationResponse(response: String,responseCode:AssistSession.ApiResponse) {
+    override fun onValidationResponse(response: String, responseCode: AssistSession.ApiResponse) {
         Toast.makeText(activity, response, Toast.LENGTH_SHORT).show()
         when (responseCode) {
             AssistSession.ApiResponse.SUCCESS -> {
@@ -55,13 +57,24 @@ class ISessionCallbacks(private val activity: Activity, private val binding: Act
         }
     }
 
-
+    /**
+     * To handle session start failure cases
+     */
+    override fun onSessionStartFailed(failure: SessionStartFailure) {
+        val message: String = when (failure) {
+            SessionStartFailure.BELOW_MIN_API_LEVEL -> "Minimum supported android version is Lollipop"
+            SessionStartFailure.CONTEXT_NOT_AVAILABLE -> "Application context not provided"
+            SessionStartFailure.INVALID_SDK_TOKEN -> "SDK Token is invalid"
+            SessionStartFailure.INVALID_SESSION_KEY -> "Session Key is invalid"
+        }
+        Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
+    }
 
     /**
      * To perform any operation after session ended
      */
     override fun onSessionEnded() {
-        activity. runOnUiThread{
+        activity.runOnUiThread {
             binding.helloText.append("\n Session Ended")//no i18n
         }
     }
