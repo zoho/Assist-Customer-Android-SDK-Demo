@@ -2,8 +2,8 @@ package com.zoho.assist.customer.demo
 
 import android.app.Activity
 import android.content.Intent
+import android.view.View
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import com.zoho.assist.customer.AssistSession
 import com.zoho.assist.customer.SessionCallbacks
 import com.zoho.assist.customer.SessionStartFailure
@@ -14,8 +14,6 @@ import com.zoho.assist.customer.model.ChatModel
 class ISessionCallbacks(private val activity: Activity, private val binding: ActivityMainBinding) :
     SessionCallbacks {
 
-    lateinit var dialog: AlertDialog
-
     /**
      *   param - response
      *   To perform any operation using the response from validating the token and session key
@@ -24,12 +22,11 @@ class ISessionCallbacks(private val activity: Activity, private val binding: Act
         Toast.makeText(activity, response, Toast.LENGTH_SHORT).show()
         when (responseCode) {
             AssistSession.ApiResponse.SUCCESS -> {
-                activity.onDismiss()
+                binding.logView.text = ("Validation successful") //no i18n
             }
             AssistSession.ApiResponse.ERROR -> {
-                activity.onDismiss()
-                activity.finish()
-                activity.startActivity(Intent(activity, JoinActivity::class.java))
+                Toast.makeText(activity, "Validation failed $response", Toast.LENGTH_SHORT).show()
+                returnToJoinSessionActivity()
             }
         }
     }
@@ -38,18 +35,12 @@ class ISessionCallbacks(private val activity: Activity, private val binding: Act
      * To perform any operation when session gets connected successfully
      */
     override fun onSessionStarted() {
-        binding.helloText.text = ("\nStarting Session")//no i18n
+        binding.logView.append("\nStarting Session")//no i18n
         binding.closeSession.isEnabled = true
         binding.startShare.isEnabled = false
         binding.stopShare.isEnabled = true
         binding.sendMessage.isEnabled = true
         binding.startSession.isEnabled = false
-
-        if (::dialog.isLateinit) {
-            if (::dialog.isInitialized) {
-                closeCustomDialog(dialog)
-            }
-        }
     }
 
     /**
@@ -63,13 +54,15 @@ class ISessionCallbacks(private val activity: Activity, private val binding: Act
             SessionStartFailure.INVALID_SESSION_KEY -> "Session Key is invalid"
         }
         Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
+        returnToJoinSessionActivity()
     }
 
     /**
      * To perform any operation after session ended
      */
     override fun onSessionEnded() {
-        binding.helloText.append("\n Session Ended")//no i18n
+        binding.logView.append("\nSession Ended")//no i18n
+        returnToJoinSessionActivity()
     }
 
     /**
@@ -80,18 +73,19 @@ class ISessionCallbacks(private val activity: Activity, private val binding: Act
          * true - Approve
          * false - Reject
          */
-
         AssistSession.INSTANCE.startScreenSharing(true)
     }
-
 
     /**
      *  param - chatModel
      * To manipulate the chat message object for addition to the chat history list and other info
      */
-    override fun onMessageReceived(chatModel: ChatModel) {
-        if (chatModel.type == ChatModel.ChatMode.RECEIVED) {
-            binding.helloText.append("\n${chatModel.senderName}: ${chatModel.msg}")
+    override fun onMessageReceived(model: ChatModel) {
+        if (model.type == ChatModel.ChatMode.RECEIVED) {
+            binding.logView.append("\n${model.senderName}: ${model.msg}")
+            binding.logViewScrollView.postDelayed({
+                binding.logViewScrollView.fullScroll(View.FOCUS_DOWN)
+            }, 200)
         }
     }
 
@@ -110,12 +104,17 @@ class ISessionCallbacks(private val activity: Activity, private val binding: Act
      * Requesting the customer to trigger the addon download via playstore.
      */
     override fun onAddOnAvailableForDownload() {
-        /***
-         * Triggers addon download
-         */
-        AssistSession.INSTANCE.onAddOnDownload()
+        AssistSession.INSTANCE.startAddon()
     }
 
+    private fun returnToJoinSessionActivity() {
+        if (activity.isTaskRoot) {
+            activity.startActivity(Intent(activity, JoinActivity::class.java))
+            activity.finish()
+        } else {
+            activity.onBackPressed()
+        }
+    }
 
 }
 

@@ -15,38 +15,24 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.databinding.DataBindingUtil
 import com.zoho.assist.customer.AssistSession
-import com.zoho.assist.customer.chat.viewmodel.ChatViewModel
 import com.zoho.assist.customer.demo.Constants.NOTIFICATION_ACTION
 import com.zoho.assist.customer.demo.Constants.NOTIFICATION_PENDING_INTENT_ID
 import com.zoho.assist.customer.demo.Constants.SDK_TOKEN
 import com.zoho.assist.customer.demo.Constants.SESSION_KEY
 import com.zoho.assist.customer.demo.databinding.ActivityMainBinding
-import com.zoho.assist.customer.util.Constants
 
 
 @SuppressLint("Registered")
 class MainActivity : AppCompatActivity() {
 
-    lateinit var viewDataBinding: ActivityMainBinding
-
+    private lateinit var viewDataBinding: ActivityMainBinding
     private lateinit var callback: ISessionCallbacks
-    var sessionKey = ""
-
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewDataBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-
-        /**
-         * SetContext
-         */
-        AssistSession.INSTANCE.setContext(this.application.applicationContext)
         callback = ISessionCallbacks(this, viewDataBinding)
         AssistSession.INSTANCE.onCreate(this, callback)
-
 
         onViewCreate()
         viewDataBinding.executePendingBindings()
@@ -59,16 +45,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * ===============================================================================
+     * Note:-
+     *
      * onStop(), onResume() are needed only when the Floating Head feature is enabled
-     *
-     *
      */
 
     /**
      * Called when the app is no longer visible to the user
      */
-
     override fun onStop() {
         super.onStop()
         AssistSession.INSTANCE.onStop()
@@ -90,7 +74,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             if (intent != null) {
                 if (intent.getStringExtra(SESSION_KEY).isNullOrEmpty() && !AssistSession.INSTANCE.isSessionAlive()) {
-                    joinSessionActivity()
+                    returnToJoinSessionActivity()
                 } else if (intent.action == null) {
                     val authToken = intent.getStringExtra(SDK_TOKEN)
                     val sessionKey = intent.getStringExtra(SESSION_KEY)
@@ -110,17 +94,12 @@ class MainActivity : AppCompatActivity() {
             viewDataBinding.startSession.isEnabled = true
             viewDataBinding.closeSession.isEnabled = false
             intent.putExtra(SESSION_KEY, "")
-            viewDataBinding.helloText.append("\nSession Stopped")//no i18n
-            joinSessionActivity()
-            Toast.makeText(this@MainActivity, "Closed the session", Toast.LENGTH_SHORT)
-                .show()//no i18n
-
+            viewDataBinding.logView.append("\nSession Stopped")//no i18n
+            Toast.makeText(this@MainActivity, "Closed the session", Toast.LENGTH_SHORT).show()//no i18n
         }
-        viewDataBinding.startSession.setOnClickListener(View.OnClickListener {
-
+        viewDataBinding.startSession.setOnClickListener {
             if (intent.getStringExtra(SESSION_KEY).isNullOrEmpty()) {
-                joinSessionActivity()
-
+                returnToJoinSessionActivity()
             } else if (intent.action == null) {
                 val authToken = intent.getStringExtra(SDK_TOKEN)
                 val sessionKey = intent.getStringExtra(SESSION_KEY)
@@ -128,42 +107,43 @@ class MainActivity : AppCompatActivity() {
                     onStartSession(sessionKey, authToken)
                 }
             }
+        }
 
-        })
-
-        viewDataBinding.startShare.setOnClickListener(View.OnClickListener {
+        viewDataBinding.startShare.setOnClickListener {
             //to restart the screen sharing
             AssistSession.INSTANCE.onStartShare()
-            viewDataBinding.helloText.append("\n Restart Sharing")//no i18n
+            viewDataBinding.logView.append("\nRestart Sharing")//no i18n
             viewDataBinding.startShare.isEnabled = false
             viewDataBinding.stopShare.isEnabled = true
-        })
+        }
 
-        viewDataBinding.stopShare.setOnClickListener(View.OnClickListener {
+        viewDataBinding.stopShare.setOnClickListener {
             //to stop the screen sharing
             AssistSession.INSTANCE.onStopShare()
-            viewDataBinding.helloText.append("\nStop Sharing")//no i18n
+            viewDataBinding.logView.append("\nStop Sharing")//no i18n
             viewDataBinding.stopShare.isEnabled = false
             viewDataBinding.startShare.isEnabled = true
-        })
+        }
 
-        viewDataBinding.sendMessage.setOnClickListener(View.OnClickListener {
+        viewDataBinding.sendMessage.setOnClickListener {
             //send a chat message to the viewers
-            viewDataBinding.helloText.append("\nSending message:: " + Date().toString())//no i18n
+            viewDataBinding.logView.append("\nSending message:: " + Date().toString())//no i18n
             AssistSession.INSTANCE.onSendMessage("message:: " + Date().toString())//no i18n
-        })
+        }
     }
 
 
-    private fun joinSessionActivity() {
-        startActivity(Intent(this@MainActivity, JoinActivity::class.java))
-        finish()
+    private fun returnToJoinSessionActivity() {
+        if (this.isTaskRoot) {
+            startActivity(Intent(this@MainActivity, JoinActivity::class.java))
+            finish()
+        } else {
+            onBackPressed()
+        }
     }
 
 
     private fun onStartSession(key: String, authToken: String) {
-        sessionKey = key
-
         //Assist Agent init
         AssistSession.INSTANCE
             .setCallbacks(callback)   //pass over an instance of class implementing SessionCallbacks.
@@ -192,9 +172,8 @@ class MainActivity : AppCompatActivity() {
                 channelName,
                 NotificationManager.IMPORTANCE_DEFAULT
             )
-
             val manager = getSystemService(NotificationManager::class.java)
-            manager!!.createNotificationChannel(serviceChannel)
+            manager?.createNotificationChannel(serviceChannel)
         }
 
         val notificationIntent = Intent(this, MainActivity::class.java)
@@ -226,13 +205,12 @@ class MainActivity : AppCompatActivity() {
             val stringId = applicationInfo.labelRes
             if (stringId == 0) applicationInfo.nonLocalizedLabel.toString() else getString(stringId)
         } catch (ex: Exception) {
-            ""
+            "Assist Customer SDK Demo"//no i18n
         }
     }
 
-
     override fun onBackPressed() {
-        viewDataBinding.helloText.text = (" Back Pressed")//no i18n
+        viewDataBinding.logView.append("\nBack Pressed")//no i18n
         if (!AssistSession.INSTANCE.isSessionAlive()) {
             super.onBackPressed()
         } else {
@@ -242,13 +220,10 @@ class MainActivity : AppCompatActivity() {
             viewDataBinding.sendMessage.isEnabled = false
             viewDataBinding.startSession.isEnabled = true
             viewDataBinding.closeSession.isEnabled = false
-            intent.putExtra("session_key", "")
-            viewDataBinding.helloText.append("\nSession Stopped")//no i18n
-            joinSessionActivity()
+            intent.putExtra(SESSION_KEY, "")
+            viewDataBinding.logView.append("\nSession Stopped")//no i18n
             viewDataBinding.startSession.visibility = View.GONE
-            finish()
         }
-
     }
 
 }

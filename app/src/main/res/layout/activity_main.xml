@@ -74,16 +74,21 @@
         </LinearLayout>
 
         <ScrollView
+            android:id="@+id/log_view_scroll_view"
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:layout_margin="4dp"
+            android:background="@drawable/rect_border"
+            android:fadeScrollbars="false"
             android:layout_weight="1">
 
             <TextView
-                android:id="@+id/hello_text"
+                android:id="@+id/log_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:lineSpacingExtra="4dp"
-                android:text="Hello World!" />
+                android:padding="4dp"
+                android:text="" />
         </ScrollView>
 
     </LinearLayout>
