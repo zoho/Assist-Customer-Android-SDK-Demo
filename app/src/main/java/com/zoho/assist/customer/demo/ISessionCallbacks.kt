@@ -25,34 +25,29 @@ class ISessionCallbacks(private val activity: Activity, private val binding: Act
         when (responseCode) {
             AssistSession.ApiResponse.SUCCESS -> {
                 activity.onDismiss()
-
             }
             AssistSession.ApiResponse.ERROR -> {
                 activity.onDismiss()
                 activity.finish()
                 activity.startActivity(Intent(activity, JoinActivity::class.java))
-
             }
         }
-
     }
 
     /**
      * To perform any operation when session gets connected successfully
      */
     override fun onSessionStarted() {
-        activity.runOnUiThread {
-            binding.helloText.text = ("\nStarting Session")//no i18n
-            binding.closeSession.isEnabled = true
-            binding.startShare.isEnabled = false
-            binding.stopShare.isEnabled = true
-            binding.sendMessage.isEnabled = true
-            binding.startSession.isEnabled = false
+        binding.helloText.text = ("\nStarting Session")//no i18n
+        binding.closeSession.isEnabled = true
+        binding.startShare.isEnabled = false
+        binding.stopShare.isEnabled = true
+        binding.sendMessage.isEnabled = true
+        binding.startSession.isEnabled = false
 
-            if (::dialog.isLateinit) {
-                if (::dialog.isInitialized) {
-                    closeCustomDialog(dialog)
-                }
+        if (::dialog.isLateinit) {
+            if (::dialog.isInitialized) {
+                closeCustomDialog(dialog)
             }
         }
     }
@@ -74,9 +69,7 @@ class ISessionCallbacks(private val activity: Activity, private val binding: Act
      * To perform any operation after session ended
      */
     override fun onSessionEnded() {
-        activity.runOnUiThread {
-            binding.helloText.append("\n Session Ended")//no i18n
-        }
+        binding.helloText.append("\n Session Ended")//no i18n
     }
 
     /**
@@ -97,9 +90,9 @@ class ISessionCallbacks(private val activity: Activity, private val binding: Act
      * To manipulate the chat message object for addition to the chat history list and other info
      */
     override fun onMessageReceived(chatModel: ChatModel) {
-//        activity. runOnUiThread {
-//            (activity as MainActivity).getChatFragemnt().onReceived(chatModel)
-//        }
+        if (chatModel.type == ChatModel.ChatMode.RECEIVED) {
+            binding.helloText.append("\n${chatModel.senderName}: ${chatModel.msg}")
+        }
     }
 
     /**
