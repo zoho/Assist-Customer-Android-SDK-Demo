@@ -10,8 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.zoho.assist.customer.demo.Constants.SDK_TOKEN
 import com.zoho.assist.customer.demo.Constants.SESSION_KEY
 import kotlinx.android.synthetic.main.activity_join.*
-
-import java.lang.Exception
+import java.lang.RuntimeException
 
 
 class JoinActivity : AppCompatActivity() {
@@ -20,40 +19,41 @@ class JoinActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_join)
 
-        val edittext = findViewById<EditText>(R.id.key_edittext)
-        val authtoken = findViewById<EditText>(R.id.authtoken_edittext)
-        fab.setOnClickListener {
-            var sessionKey = edittext.text.toString()
-            sessionKey.let {
-                Log.d("Done", sessionKey)
-                var key = if (sessionKey.isEmpty()) {
-                    ""
-                } else {
-                    sessionKey
-                }
+        val sessionKeyEditText = findViewById<EditText>(R.id.key_edittext)
+        val authTokenEditText = findViewById<EditText>(R.id.authtoken_edittext)
 
-                if (!authtoken.text.toString().isNullOrEmpty()) {
-                    onStartSession(sessionKey, authtoken.text.toString())
-                } else {
-                    authtoken.error = "Please enter the AuthToken"
-                }
-                val imm = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
-                imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0)
+        sessionKeyEditText.setText("")
+        authTokenEditText.setText("wSsVR61w8xCjCKd7zmb5c+s9zVlRDlyiF0502lOm7nKuGv6U98dpxE3LUQelGPYcFW44QDATobkszBcE1DZc2Ysqyg4HCCiF9mqRe1U4J3x1pLvnkjTCWG1dkxOILY0Ixgxrkg==")
+
+        fab.setOnClickListener {
+            val sessionKey = sessionKeyEditText.text.toString()
+            val authToken = authTokenEditText.text.toString()
+
+            Log.d("Done", sessionKey)
+            if (authToken.isNotEmpty()) {
+                startSession(sessionKey, authToken)
+            } else {
+                authTokenEditText.error = "Please enter the AuthToken"
             }
+
+            //Hide the keyboard incase it's open.
+            val imm = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0)
         }
 
 
     }
 
 
-    private fun onStartSession(sessionKey: String, authToken: String) {
-
+    private fun startSession(sessionKey: String, authToken: String) {
         val intent = Intent(this@JoinActivity, MainActivity::class.java)
         intent.putExtra(SESSION_KEY, sessionKey)
         intent.putExtra(SDK_TOKEN, authToken)
         startActivity(intent)
-
     }
 
-
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.e("JoinActivity destroyed ", "Sad", Throwable(" >_< "))
+    }
 }
