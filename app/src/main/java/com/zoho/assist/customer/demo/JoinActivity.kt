@@ -23,7 +23,7 @@ class JoinActivity : AppCompatActivity() {
         val edittext = findViewById<EditText>(R.id.key_edittext)
         val authtoken = findViewById<EditText>(R.id.authtoken_edittext)
         fab.setOnClickListener {
-           var sessionKey = edittext.text.toString()
+            var sessionKey = edittext.text.toString()
             sessionKey.let {
                 Log.d("Done", sessionKey)
                 var key = if (sessionKey.isEmpty()) {

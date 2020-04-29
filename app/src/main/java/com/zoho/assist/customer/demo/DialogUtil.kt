@@ -1,4 +1,5 @@
 @file:Suppress("DEPRECATION")
+
 package com.zoho.assist.customer.demo
 
 import android.content.Context
@@ -11,10 +12,12 @@ import android.view.WindowManager
 
 
 var progressBar: ProgressDialog? = null
-fun Context.showCustomDialog(resId: Int, sessionKey: String, onButtonClick: (key: String?/*, gateway: String?*/) -> Unit): AlertDialog {
 
-
-
+fun Context.showCustomDialog(
+    resId: Int,
+    sessionKey: String,
+    onButtonClick: (key: String?/*, gateway: String?*/) -> Unit
+): AlertDialog {
     val builder = AlertDialog.Builder(this)
     val view = LayoutInflater.from(this).inflate(resId, null)
     builder.setView(view)
@@ -30,21 +33,20 @@ fun Context.showCustomDialog(resId: Int, sessionKey: String, onButtonClick: (key
     val alertDialog = builder.create()
     view.findViewById<Button>(R.id.ok_button).setOnClickListener {
         if (!edittext.text.toString().isEmpty())
-        onButtonClick(edittext.text.toString())
-
+            onButtonClick(edittext.text.toString())
     }
 
     try {
-    alertDialog.setCanceledOnTouchOutside(false)
-    alertDialog.setCancelable(false)
-    alertDialog.show()
-    }catch (ex:Exception){
-
+        alertDialog.setCanceledOnTouchOutside(false)
+        alertDialog.setCancelable(false)
+        alertDialog.show()
+    } catch (ex: Exception) {
+        ex.printStackTrace()
     }
     return alertDialog
 }
 
-fun Context.onShowLoader(){
+fun Context.onShowLoader() {
     progressBar = ProgressDialog(this)
     progressBar.let {
         progressBar!!.setMessage("Connecting....")
@@ -52,18 +54,16 @@ fun Context.onShowLoader(){
         progressBar!!.progress = 0
         progressBar!!.max = 100
         try {
-
-            if(progressBar!=null) {
+            if (progressBar != null) {
                 progressBar!!.show()
             }
-
-        }catch (e: WindowManager.BadTokenException){
+        } catch (e: WindowManager.BadTokenException) {
             e.printStackTrace()
         }
     }
 }
 
-fun  Context.onDismiss() {
+fun Context.onDismiss() {
     try {
         if (progressBar != null) {
             progressBar.let {
@@ -71,7 +71,7 @@ fun  Context.onDismiss() {
             }
         }
     } catch (ex: Exception) {
-
+        ex.printStackTrace()
     }
 }
 
@@ -82,9 +82,8 @@ fun closeCustomDialog(alertDialog: AlertDialog) {
             alertDialog.dismiss()
         }
     } catch (ex: Exception) {
-
+        ex.printStackTrace()
     }
-
 }
 
 

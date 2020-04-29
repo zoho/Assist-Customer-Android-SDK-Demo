@@ -30,33 +30,33 @@ class MainActivity : AppCompatActivity() {
     lateinit var viewDataBinding: ActivityMainBinding
 
     private lateinit var callback: ISessionCallbacks
-    var sessionKey=""
+    var sessionKey = ""
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
     }
 
-        override fun onCreate(savedInstanceState: Bundle?) {
-            super.onCreate(savedInstanceState)
-            viewDataBinding = DataBindingUtil.setContentView(this,  R.layout.activity_main)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        viewDataBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
-            /**
-             * SetContext
-             */
-            AssistSession.INSTANCE.setContext(this.application.applicationContext)
-            callback = ISessionCallbacks(this, viewDataBinding)
-            AssistSession.INSTANCE.onCreate(this,callback)
-
-
-            onViewCreate()
-            viewDataBinding.executePendingBindings()
-        }
+        /**
+         * SetContext
+         */
+        AssistSession.INSTANCE.setContext(this.application.applicationContext)
+        callback = ISessionCallbacks(this, viewDataBinding)
+        AssistSession.INSTANCE.onCreate(this, callback)
 
 
-        override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-            super.onActivityResult(requestCode, resultCode, data)
-            data?.let { AssistSession.INSTANCE.onActivityResult(requestCode,resultCode, it) }
-        }
+        onViewCreate()
+        viewDataBinding.executePendingBindings()
+    }
+
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        data?.let { AssistSession.INSTANCE.onActivityResult(requestCode, resultCode, it) }
+    }
 
     /**
      * ===============================================================================
@@ -94,7 +94,7 @@ class MainActivity : AppCompatActivity() {
                 } else if (intent.action == null) {
                     val authToken = intent.getStringExtra(SDK_TOKEN)
                     val sessionKey = intent.getStringExtra(SESSION_KEY)
-                    if (authToken!=null && sessionKey!=null) {
+                    if (authToken != null && sessionKey != null) {
                         onStartSession(sessionKey, authToken)
                     }
                 }
@@ -104,15 +104,16 @@ class MainActivity : AppCompatActivity() {
         //click listeners
         viewDataBinding.closeSession.setOnClickListener {
             AssistSession.INSTANCE.onCustomerEndSession()
-                    viewDataBinding.startShare.isEnabled = false
-                    viewDataBinding.stopShare.isEnabled = false
-                    viewDataBinding.sendMessage.isEnabled = false
-                    viewDataBinding.startSession.isEnabled = true
-                    viewDataBinding.closeSession.isEnabled = false
-                    intent.putExtra(SESSION_KEY,"")
-                    viewDataBinding.helloText.append("\nSession Stopped")//no i18n
-                    joinSessionActivity()
-                    Toast.makeText(this@MainActivity, "Closed the session", Toast.LENGTH_SHORT).show()//no i18n
+            viewDataBinding.startShare.isEnabled = false
+            viewDataBinding.stopShare.isEnabled = false
+            viewDataBinding.sendMessage.isEnabled = false
+            viewDataBinding.startSession.isEnabled = true
+            viewDataBinding.closeSession.isEnabled = false
+            intent.putExtra(SESSION_KEY, "")
+            viewDataBinding.helloText.append("\nSession Stopped")//no i18n
+            joinSessionActivity()
+            Toast.makeText(this@MainActivity, "Closed the session", Toast.LENGTH_SHORT)
+                .show()//no i18n
 
         }
         viewDataBinding.startSession.setOnClickListener(View.OnClickListener {
@@ -120,10 +121,10 @@ class MainActivity : AppCompatActivity() {
             if (intent.getStringExtra(SESSION_KEY).isNullOrEmpty()) {
                 joinSessionActivity()
 
-            } else if(intent.action==null){
-                val authToken= intent.getStringExtra(SDK_TOKEN)
+            } else if (intent.action == null) {
+                val authToken = intent.getStringExtra(SDK_TOKEN)
                 val sessionKey = intent.getStringExtra(SESSION_KEY)
-                if (authToken!=null && sessionKey!=null) {
+                if (authToken != null && sessionKey != null) {
                     onStartSession(sessionKey, authToken)
                 }
             }
@@ -154,32 +155,37 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
-
     private fun joinSessionActivity() {
-        startActivity( Intent(this@MainActivity,JoinActivity::class.java))
+        startActivity(Intent(this@MainActivity, JoinActivity::class.java))
         finish()
     }
 
 
     private fun onStartSession(key: String, authToken: String) {
-        sessionKey=key
+        sessionKey = key
 
         //Assist Agent init
         AssistSession.INSTANCE
             .setCallbacks(callback)   //pass over an instance of class implementing SessionCallbacks.
-            .setCustomerDetails("guest","email@emailcom") // share username and userEmail - Default value is Guest
-            .setAuthToken(authToken )
-            .enableFloatingHead(false)
+            .setCustomerDetails(
+                "guest",
+                "email@emailcom"
+            ) // share username and userEmail - Default value is Guest
+            .setAuthToken(authToken)
+            .enableFloatingHead(true)
             .shareScreenOnStart(true)
             .downloadAddonOnStart(true)
             .setKeepAliveNotification(getNotification()) // Optional
-            .start(key,MainActivity::class.java,R.drawable.assist_flat) //this represent Activity Context,
+            .start(
+                key,
+                MainActivity::class.java,
+                R.drawable.assist_flat
+            ) //this represent Activity Context,
     }
 
     private fun getNotification(): Notification? {
         val channelId = "channelId"
-        val channelName ="channelName"
+        val channelName = "channelName"
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val serviceChannel = NotificationChannel(
                 channelId,
@@ -193,10 +199,19 @@ class MainActivity : AppCompatActivity() {
 
         val notificationIntent = Intent(this, MainActivity::class.java)
         notificationIntent.action = NOTIFICATION_ACTION
-        notificationIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        val pendingIntent = PendingIntent.getActivity(this, NOTIFICATION_PENDING_INTENT_ID, notificationIntent,  PendingIntent.FLAG_UPDATE_CURRENT)
-        val title= String.format( getApplicationName())
-        val  message=  String.format("%s is currently running and the technician can see whatever is displayed on your screen",  getApplicationName())
+        notificationIntent.flags =
+            Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            NOTIFICATION_PENDING_INTENT_ID,
+            notificationIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        val title = String.format(getApplicationName())
+        val message = String.format(
+            "%s is currently running and the technician can see whatever is displayed on your screen",
+            getApplicationName()
+        )
         return NotificationCompat.Builder(this, channelId)
             .setContentTitle(title)
             .setContentText(message)
@@ -210,30 +225,28 @@ class MainActivity : AppCompatActivity() {
             val applicationInfo = applicationInfo
             val stringId = applicationInfo.labelRes
             if (stringId == 0) applicationInfo.nonLocalizedLabel.toString() else getString(stringId)
-        }catch (ex:Exception){
+        } catch (ex: Exception) {
             ""
         }
     }
 
 
-
-
     override fun onBackPressed() {
         viewDataBinding.helloText.text = (" Back Pressed")//no i18n
-        if(!AssistSession.INSTANCE.isSessionAlive()) {
+        if (!AssistSession.INSTANCE.isSessionAlive()) {
             super.onBackPressed()
-        }else{
+        } else {
             AssistSession.INSTANCE.onCustomerEndSession()
-                    viewDataBinding.startShare.isEnabled = false
-                    viewDataBinding.stopShare.isEnabled = false
-                    viewDataBinding.sendMessage.isEnabled = false
-                    viewDataBinding.startSession.isEnabled = true
-                    viewDataBinding.closeSession.isEnabled = false
-                    intent.putExtra("session_key","")
-                    viewDataBinding.helloText.append("\nSession Stopped")//no i18n
-                    joinSessionActivity()
-                    viewDataBinding.startSession.visibility = View.GONE
-                    finish()
+            viewDataBinding.startShare.isEnabled = false
+            viewDataBinding.stopShare.isEnabled = false
+            viewDataBinding.sendMessage.isEnabled = false
+            viewDataBinding.startSession.isEnabled = true
+            viewDataBinding.closeSession.isEnabled = false
+            intent.putExtra("session_key", "")
+            viewDataBinding.helloText.append("\nSession Stopped")//no i18n
+            joinSessionActivity()
+            viewDataBinding.startSession.visibility = View.GONE
+            finish()
         }
 
     }
