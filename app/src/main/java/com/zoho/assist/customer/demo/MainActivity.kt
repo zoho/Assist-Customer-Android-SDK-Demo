@@ -168,7 +168,6 @@ class MainActivity : AppCompatActivity() {
         //Assist Agent init
         AssistSession.INSTANCE
             .setCallbacks(callback)   //pass over an instance of class implementing SessionCallbacks.
-            // All events will be triggered here. (In Background thread)
             .setCustomerDetails("guest","email@emailcom") // share username and userEmail - Default value is Guest
             .setAuthToken(authToken )
             .enableFloatingHead(false)
