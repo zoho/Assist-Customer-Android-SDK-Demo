@@ -16,6 +16,10 @@ import androidx.core.app.NotificationCompat
 import androidx.databinding.DataBindingUtil
 import com.zoho.assist.customer.AssistSession
 import com.zoho.assist.customer.chat.viewmodel.ChatViewModel
+import com.zoho.assist.customer.demo.Constants.NOTIFICATION_ACTION
+import com.zoho.assist.customer.demo.Constants.NOTIFICATION_PENDING_INTENT_ID
+import com.zoho.assist.customer.demo.Constants.SDK_TOKEN
+import com.zoho.assist.customer.demo.Constants.SESSION_KEY
 import com.zoho.assist.customer.demo.databinding.ActivityMainBinding
 import com.zoho.assist.customer.util.Constants
 
@@ -80,14 +84,20 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun onViewCreate() {
-        if(intent!=null) {
-
-            if (intent.getStringExtra(Constants.SESSION_KEY).isNullOrEmpty()&& !AssistSession.INSTANCE.isSessionAlive()) {
-                joinSessionActivity()
-
-            } else if(intent.action==null){
-                val authToken= intent.getStringExtra("AuthToken")
-                onStartSession(intent.getStringExtra(Constants.SESSION_KEY),authToken )
+        if (AssistSession.INSTANCE.isSessionAlive()) {
+            callback.onSessionStarted()
+            Toast.makeText(this, "Session in progress", Toast.LENGTH_SHORT).show()
+        } else {
+            if (intent != null) {
+                if (intent.getStringExtra(SESSION_KEY).isNullOrEmpty() && !AssistSession.INSTANCE.isSessionAlive()) {
+                    joinSessionActivity()
+                } else if (intent.action == null) {
+                    val authToken = intent.getStringExtra(SDK_TOKEN)
+                    val sessionKey = intent.getStringExtra(SESSION_KEY)
+                    if (authToken!=null && sessionKey!=null) {
+                        onStartSession(sessionKey, authToken)
+                    }
+                }
             }
         }
 
@@ -99,7 +109,7 @@ class MainActivity : AppCompatActivity() {
                     viewDataBinding.sendMessage.isEnabled = false
                     viewDataBinding.startSession.isEnabled = true
                     viewDataBinding.closeSession.isEnabled = false
-                    intent.putExtra(Constants.SESSION_KEY,"")
+                    intent.putExtra(SESSION_KEY,"")
                     viewDataBinding.helloText.append("\nSession Stopped")//no i18n
                     joinSessionActivity()
                     Toast.makeText(this@MainActivity, "Closed the session", Toast.LENGTH_SHORT).show()//no i18n
@@ -107,12 +117,15 @@ class MainActivity : AppCompatActivity() {
         }
         viewDataBinding.startSession.setOnClickListener(View.OnClickListener {
 
-            if (intent.getStringExtra(Constants.SESSION_KEY).isEmpty()) {
+            if (intent.getStringExtra(SESSION_KEY).isNullOrEmpty()) {
                 joinSessionActivity()
 
             } else if(intent.action==null){
-                val authToken= intent.getStringExtra("AuthToken")
-                onStartSession(intent.getStringExtra(Constants.SESSION_KEY),authToken )
+                val authToken= intent.getStringExtra(SDK_TOKEN)
+                val sessionKey = intent.getStringExtra(SESSION_KEY)
+                if (authToken!=null && sessionKey!=null) {
+                    onStartSession(sessionKey, authToken)
+                }
             }
 
         })
@@ -180,9 +193,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         val notificationIntent = Intent(this, MainActivity::class.java)
-        notificationIntent.action = Constants.MAIN_ACTION
+        notificationIntent.action = NOTIFICATION_ACTION
         notificationIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        val pendingIntent = PendingIntent.getActivity(this,  Constants.NOTIFICATION_ID.PENDING_INTENT_ID, notificationIntent,  PendingIntent.FLAG_UPDATE_CURRENT)
+        val pendingIntent = PendingIntent.getActivity(this, NOTIFICATION_PENDING_INTENT_ID, notificationIntent,  PendingIntent.FLAG_UPDATE_CURRENT)
         val title= String.format( getApplicationName())
         val  message=  String.format("%s is currently running and the technician can see whatever is displayed on your screen",  getApplicationName())
         return NotificationCompat.Builder(this, channelId)
@@ -192,6 +205,7 @@ class MainActivity : AppCompatActivity() {
             .setContentIntent(pendingIntent)
             .build()
     }
+
     private fun getApplicationName(): String {
         return try {
             val applicationInfo = applicationInfo
