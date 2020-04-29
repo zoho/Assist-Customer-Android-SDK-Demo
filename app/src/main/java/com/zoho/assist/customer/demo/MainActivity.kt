@@ -128,6 +128,9 @@ class MainActivity : AppCompatActivity() {
         viewDataBinding.sendMessage.setOnClickListener {
             //send a chat message to the viewers
             viewDataBinding.logView.append("\nSending message:: " + Date().toString())//no i18n
+            viewDataBinding.logViewScrollView.postDelayed({
+                viewDataBinding.logViewScrollView.fullScroll(View.FOCUS_DOWN)
+            }, 200)
             AssistSession.INSTANCE.onSendMessage("message:: " + Date().toString())//no i18n
         }
     }
