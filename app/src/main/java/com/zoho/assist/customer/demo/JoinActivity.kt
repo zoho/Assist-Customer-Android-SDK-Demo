@@ -23,7 +23,7 @@ class JoinActivity : AppCompatActivity() {
         val authTokenEditText = findViewById<EditText>(R.id.authtoken_edittext)
 
         sessionKeyEditText.setText("")
-        authTokenEditText.setText("wSsVR61w8xCjCKd7zmb5c+s9zVlRDlyiF0502lOm7nKuGv6U98dpxE3LUQelGPYcFW44QDATobkszBcE1DZc2Ysqyg4HCCiF9mqRe1U4J3x1pLvnkjTCWG1dkxOILY0Ixgxrkg==")
+        authTokenEditText.setText("")
 
         fab.setOnClickListener {
             val sessionKey = sessionKeyEditText.text.toString()
