@@ -37,8 +37,6 @@ class ISessionCallbacks(private val activity: Activity, private val binding: Act
     override fun onSessionStarted() {
         binding.logView.append("\nStarting Session")//no i18n
         binding.closeSession.isEnabled = true
-        binding.startShare.isEnabled = false
-        binding.stopShare.isEnabled = true
         binding.sendMessage.isEnabled = true
         binding.startSession.isEnabled = false
     }

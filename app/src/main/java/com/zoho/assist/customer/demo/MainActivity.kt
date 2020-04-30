@@ -41,7 +41,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        data?.let { AssistSession.INSTANCE.onActivityResult(requestCode, resultCode, it) }
+        AssistSession.INSTANCE.onActivityResult(requestCode, resultCode, data)
+        //Update screenSharing buttons based on whether or not user provided screen sharing permission.
+        resetScreenSharingButtons()
     }
 
     /**
@@ -69,7 +71,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun onViewCreate() {
         if (AssistSession.INSTANCE.isSessionAlive()) {
+            //Set the enabled states for the various buttons whilst in session.
             callback.onSessionStarted()
+            resetScreenSharingButtons()
             Toast.makeText(this, "Session in progress", Toast.LENGTH_SHORT).show()
         } else {
             if (intent != null) {
@@ -145,6 +149,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun resetScreenSharingButtons() {
+        if (AssistSession.INSTANCE.isScreenSharing()) {
+            viewDataBinding.startShare.isEnabled = false
+            viewDataBinding.stopShare.isEnabled = true
+        } else {
+            viewDataBinding.startShare.isEnabled = true
+            viewDataBinding.stopShare.isEnabled = false
+        }
+    }
 
     private fun onStartSession(key: String, authToken: String) {
         //Assist Agent init
