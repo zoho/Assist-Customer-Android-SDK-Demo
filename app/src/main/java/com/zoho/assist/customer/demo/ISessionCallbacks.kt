@@ -39,6 +39,13 @@ class ISessionCallbacks(private val activity: Activity, private val binding: Act
         binding.closeSession.isEnabled = true
         binding.sendMessage.isEnabled = true
         binding.startSession.isEnabled = false
+        if (AssistSession.INSTANCE.isScreenSharing()) {
+            binding.startShare.isEnabled = false
+            binding.stopShare.isEnabled = true
+        } else {
+            binding.startShare.isEnabled = true
+            binding.stopShare.isEnabled = false
+        }
     }
 
     /**
