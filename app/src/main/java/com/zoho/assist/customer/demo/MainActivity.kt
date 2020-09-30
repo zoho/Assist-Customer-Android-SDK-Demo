@@ -172,6 +172,7 @@ class MainActivity : AppCompatActivity() {
             .shareScreenOnStart(true)
             .downloadAddonOnStart(true)
             .setKeepAliveNotification(getNotification()) // Optional
+//            .startRemoteControlOnStart(false) // Default is true
             .start(
                 key,
                 MainActivity::class.java,

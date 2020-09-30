@@ -9,6 +9,7 @@ import com.zoho.assist.customer.SessionCallbacks
 import com.zoho.assist.customer.SessionStartFailure
 import com.zoho.assist.customer.demo.databinding.ActivityMainBinding
 import com.zoho.assist.customer.model.ChatModel
+import com.zoho.assist.customer.model.ParticipantState
 
 
 class ISessionCallbacks(private val activity: Activity, private val binding: ActivityMainBinding) :
@@ -103,6 +104,24 @@ class ISessionCallbacks(private val activity: Activity, private val binding: Act
          * false - Reject
          */
         AssistSession.INSTANCE.onRoleChangeRequestAccepted(true)
+    }
+
+    /**
+     * Called when screen share is started, and can be used in conjunction
+     * with `startRemoteControlOnStart(false)` to prompt user for remote control permission
+     */
+    override fun onScreenShareStarted() {
+//        AssistSession.INSTANCE.startAddon()
+    }
+
+    /**
+     * Called when participant status changes
+     */
+    override fun onParticipantStateChange(
+        participantState: ParticipantState,
+        participantName: String
+    ) {
+
     }
 
     /**
