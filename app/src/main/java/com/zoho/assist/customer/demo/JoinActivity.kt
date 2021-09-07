@@ -1,19 +1,25 @@
 package com.zoho.assist.customer.demo
 
+import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.zoho.assist.customer.AssistSession
 import com.zoho.assist.customer.demo.Constants.SDK_TOKEN
 import com.zoho.assist.customer.demo.Constants.SESSION_KEY
 import com.zoho.assist.customer.listener.AddonAvailabilityCallback
 import kotlinx.android.synthetic.main.activity_join.*
 import kotlinx.android.synthetic.main.content_join.*
+import java.lang.Exception
 import java.lang.RuntimeException
 
 
@@ -69,6 +75,14 @@ class JoinActivity : AppCompatActivity() {
             })
         }
 
+        println("Storage :${ContextCompat.checkSelfPermission(this@JoinActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE) }")
+        if(ContextCompat.checkSelfPermission(this@JoinActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE).toInt()== PackageManager.PERMISSION_DENIED)
+        {
+            println("Storage : Not granted")
+            // Permission is not granted
+            checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, STORAGE_PERMISSION_CODE)
+        }
+
     }
 
 
@@ -82,5 +96,40 @@ class JoinActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         Log.e("JoinActivity destroyed ", "Sad", Throwable(" >_< "))
+    }
+
+    fun checkPermission(permission: String, requestCode: Int) {
+
+        // Checking if permission is not granted
+        if (ContextCompat.checkSelfPermission(this@JoinActivity, permission) == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(this@JoinActivity, arrayOf(permission), requestCode)
+        } else {
+            Toast.makeText(this@JoinActivity, "Permission already granted", Toast.LENGTH_SHORT).show()
+        }
+    }
+    private val STORAGE_PERMISSION_CODE = 100
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == STORAGE_PERMISSION_CODE ) {
+            var permission="Camera"
+            if(requestCode == STORAGE_PERMISSION_CODE){
+                permission="STORAGE"
+                try {
+                    if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                        // Showing the toast message
+                        Toast.makeText(this@JoinActivity,
+                            " onRequestPermissionsResult $permission Permission Granted",
+                            Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(this@JoinActivity,
+                            "onRequestPermissionsResult $permission Permission Denied",
+                            Toast.LENGTH_SHORT).show()
+                    }
+                }catch (ex: Exception){
+                    ex.printStackTrace()
+                }
+            }
+
+        }
     }
 }

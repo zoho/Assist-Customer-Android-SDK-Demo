@@ -3,6 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.zoho.assist.customer.demo">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Required on api < 21 if you are using setRequiredNetworkType(int) -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
+
     <application
         android:name=".MainApplication"
         android:allowBackup="true"
@@ -11,6 +19,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
+        tools:replace="android:allowBackup"
         tools:ignore="GoogleAppIndexingWarning">
         <activity android:name=".JoinActivity">
             <intent-filter>
