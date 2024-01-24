@@ -60,14 +60,6 @@ class MainActivity : AppCompatActivity() {
         onViewCreate(savedInstanceState)
         viewDataBinding.executePendingBindings()
     }
-
-//    /***
-//     *
-//     */
-//    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-//        AssistSession.INSTANCE.onRequestPermissionsResult(requestCode,permissions,grantResults)
-//    }
-
     /**
      *
      */
@@ -124,7 +116,6 @@ class MainActivity : AppCompatActivity() {
         if (AssistSession.INSTANCE.isSessionAlive()) {
             callback.onSessionStarted()
             resetStartStopButtons()
-//            Toast.makeText(this, "Session in progress", Toast.LENGTH_SHORT).show()
         } else {
             if (intent != null) {
                 if (intent.getStringExtra(SESSION_KEY).isNullOrEmpty() && !AssistSession.INSTANCE.isSessionAlive()) {
@@ -209,14 +200,9 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("ServiceCast")
     private fun onStartSession(key: String, authToken: String ) {
-        /***
-         *
-         */
-//        AssistSession.INSTANCE.setContext(this.application.applicationContext)
-        //Assist Agent init
+
         AssistSession.INSTANCE
             .setCallbacks(callback)   //pass over an instance of class implementing SessionCallbacks.
-            // All events will be triggered here. (In Background thread)
             .setCustomerDetails(
                 "surendran",
                 "email@emailcom"
@@ -233,12 +219,7 @@ class MainActivity : AppCompatActivity() {
                 key,
                 MainActivity::class.java,
                 R.drawable.assist_flat
-            ) //this represent Activity Context,
-
-//            .setBaseDomain(serverURL)
-//            .onOverlayFloating(MainActivity::class.java) //  drawable / -1
-//            .setQuality(Constants.ColorQualityFactors.QUALITY50) //(Default QUALITY to start with - 25/50/75/100)
-
+            )
     }
 
     fun getNotification(): Notification? {
@@ -288,10 +269,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /***
-     *
-     *
-     */
 
     override fun onBackPressed() {
         if (!AssistSession.INSTANCE.isSessionAlive()) {

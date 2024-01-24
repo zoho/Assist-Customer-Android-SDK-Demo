@@ -37,7 +37,7 @@ class JoinActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.contentLayoutId.sdkToken.setText(authToken)
-        binding.contentLayoutId.sessionKey.setText("306236250")
+        binding.contentLayoutId.sessionKey.setText("")
         binding.fab.setOnClickListener { view ->
             AssistSession.INSTANCE.setLogLevel(Level.ALL)
             var sessionKey =  binding.contentLayoutId.sessionKey.text.toString()
