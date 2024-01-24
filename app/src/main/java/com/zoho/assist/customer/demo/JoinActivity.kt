@@ -30,7 +30,7 @@ class JoinActivity : AppCompatActivity(), RadioGroup.OnCheckedChangeListener{
     }
 
     private lateinit var binding: ActivityJoinBinding
-    var authToken="wSsVR60n+hf1Ca8ozjSrde47yA5QB1v/EEV42FH16SX9F6vC8cc5lEGfDFOgTaMYEWdsQGZHprh8kRYD1DcIiNotzVlSDyiF9mqRe1U4J3x1pLnvkT7OV21dkxOILYgAwQxunQ=="
+    var authToken=""
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding= ActivityJoinBinding.inflate(layoutInflater)
