@@ -2,101 +2,155 @@ package com.zoho.assist.customer.demo
 
 import android.Manifest
 import android.app.Activity
+import android.app.ActivityManager
+import android.app.ProgressDialog
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.inputmethod.InputMethodManager
-import android.widget.EditText
+import android.widget.RadioGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.zoho.assist.customer.AssistSession
-import com.zoho.assist.customer.demo.Constants.SDK_TOKEN
-import com.zoho.assist.customer.demo.Constants.SESSION_KEY
+import com.zoho.assist.customer.demo.databinding.ActivityJoinBinding
 import com.zoho.assist.customer.listener.AddonAvailabilityCallback
-import kotlinx.android.synthetic.main.activity_join.*
-import kotlinx.android.synthetic.main.content_join.*
 import java.lang.Exception
-import java.lang.RuntimeException
+import java.util.logging.Level
 
+class JoinActivity : AppCompatActivity(), RadioGroup.OnCheckedChangeListener{
 
-class JoinActivity : AppCompatActivity() {
+    companion object {
+        const val SESSION_KEY = "Session_key"
 
+    }
+
+    private lateinit var binding: ActivityJoinBinding
+    var authToken="wSsVR60n+hf1Ca8ozjSrde47yA5QB1v/EEV42FH16SX9F6vC8cc5lEGfDFOgTaMYEWdsQGZHprh8kRYD1DcIiNotzVlSDyiF9mqRe1U4J3x1pLnvkT7OV21dkxOILYgAwQxunQ=="
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_join)
+        binding= ActivityJoinBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        val sessionKeyEditText = findViewById<EditText>(R.id.key_edittext)
-        val authTokenEditText = findViewById<EditText>(R.id.authtoken_edittext)
+        binding.contentLayoutId.radioGroup.setOnCheckedChangeListener(this)
+        binding.contentLayoutId.sdkToken.setText(authToken)
+        binding.contentLayoutId.sessionKey.setText("306236250")
+        binding.fab.setOnClickListener { view ->
+            AssistSession.INSTANCE.setLogLevel(Level.ALL)
+            var sessionKey =  binding.contentLayoutId.sessionKey.text.toString()
+            sessionKey.let {
+                Log.i("Done", sessionKey)
+                var key = if (sessionKey.isEmpty()) {
+                    ""
+                } else {
+                    sessionKey
+                }
 
-        sessionKeyEditText.setText("")
-        authTokenEditText.setText("")
-
-        fab.setOnClickListener {
-            val sessionKey = sessionKeyEditText.text.toString()
-            val authToken = authTokenEditText.text.toString()
-
-            Log.d("Done", sessionKey)
-            if (authToken.isNotEmpty()) {
-                startSession(sessionKey, authToken)
-            } else {
-                authTokenEditText.error = "Please enter the AuthToken"
+                if(!binding.contentLayoutId.sdkToken.text.toString().isEmpty()) {
+                    onStartSession(sessionKey, binding.contentLayoutId.sdkToken.text.toString())
+                }else{
+                    binding.contentLayoutId.sdkToken.error = "Please enter the AuthToken"
+                }
+                val imm = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0)
             }
-
-            //Hide the keyboard incase it's open.
-            val imm = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0)
         }
-
-        val addonAppId = AssistSession.INSTANCE.getAddonApplicationId()
-
-        checkAddon.setOnClickListener {
+        binding.contentLayoutId.checkAddon.setOnClickListener {
+            disableScreen()
             AssistSession.INSTANCE.checkAddonAvailability(object : AddonAvailabilityCallback {
                 override fun onAddonInstalled() {
-                    addonAvailabilityState.text = "Addon already installed"
+                    binding.contentLayoutId.addonAvailabilityState.text = "Addon already installed"
+                    enableScreen()
                 }
 
                 override fun onAddonAvailable(addonApplicationId: String) {
-                    addonAvailabilityState.text = "Addon available : $addonApplicationId"
+                    binding.contentLayoutId.addonAvailabilityState.text = "Addon available : $addonApplicationId"
                     this@JoinActivity.startActivityForResult(
                         Intent(
                             Intent.ACTION_VIEW,
                             Uri.parse("https://play.google.com/store/apps/details?id=${addonApplicationId}")
                         ), 14892
                     )
+                    enableScreen()
                 }
 
                 override fun onAddonUnavailable() {
-                    addonAvailabilityState.text = "Addon is unavailable"
+                    binding.contentLayoutId.addonAvailabilityState.text = "Addon is unavailable"
+                    enableScreen()
                 }
             })
         }
-
-        println("Storage :${ContextCompat.checkSelfPermission(this@JoinActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE) }")
         if(ContextCompat.checkSelfPermission(this@JoinActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE).toInt()== PackageManager.PERMISSION_DENIED)
         {
-            println("Storage : Not granted")
             // Permission is not granted
             checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, STORAGE_PERMISSION_CODE)
         }
 
+
+
+
+    }
+
+    private fun disableScreen() {
+        binding.contentLayoutId. sessionKey.isEnabled = false
+        binding.contentLayoutId.  sdkToken.isEnabled = false
+        binding .fab.isEnabled = false
+        binding.contentLayoutId.checkAddon.isEnabled = false
+    }
+
+    private fun enableScreen() {
+        binding.contentLayoutId.sessionKey.isEnabled = true
+        binding.contentLayoutId. sdkToken.isEnabled = true
+        binding. fab.isEnabled = true
+        binding.contentLayoutId. checkAddon.isEnabled = true
+    }
+
+    private fun isMyServiceRunning(serviceClass: Class<*>): Boolean {
+        val manager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        for (service in manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.name == service.service.getClassName()) {
+                Log.i("isMyServiceRunning?", true.toString() + "")
+                return true
+            }
+        }
+        Log.i("isMyServiceRunning?", false.toString() + "")
+        return false
     }
 
 
-    private fun startSession(sessionKey: String, authToken: String) {
+    private fun onStartSession(sessionKey: String, authToken: String) {
         val intent = Intent(this@JoinActivity, MainActivity::class.java)
         intent.putExtra(SESSION_KEY, sessionKey)
-        intent.putExtra(SDK_TOKEN, authToken)
+        intent.putExtra("AuthToken", authToken)
+        intent.putExtra("SERVER", serverURL)
         startActivity(intent)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.e("JoinActivity destroyed ", "Sad", Throwable(" >_< "))
+    val progressBar: ProgressDialog? = null
+    fun onDismiss() {
+        try {
+            progressBar?.let {
+                it.dismiss()
+            }
+        } catch (ex: Exception) {
+
+        }
     }
+    var serverURL="https://assist.zoho.com"
+    override fun onCheckedChanged(group: RadioGroup?, checkedId: Int) {
+        when (checkedId) {
+            R.id.live_option -> serverURL = "https://assist.zoho.com"
+            R.id.local_option -> serverURL ="https://assist.zoho.com"
+        }
+
+
+    }
+
+
 
     fun checkPermission(permission: String, requestCode: Int) {
 
@@ -132,4 +186,5 @@ class JoinActivity : AppCompatActivity() {
 
         }
     }
+
 }

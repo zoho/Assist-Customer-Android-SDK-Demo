@@ -52,16 +52,21 @@ class ISessionCallbacks(private val activity: Activity, private val binding: Act
     /**
      * To handle session start failure cases
      */
+
     override fun onSessionStartFailed(failure: SessionStartFailure) {
-        val message: String = when (failure) {
-            SessionStartFailure.BELOW_MIN_API_LEVEL -> "Minimum supported android version is Lollipop"
-            SessionStartFailure.CONTEXT_NOT_AVAILABLE -> "Application context not provided"
-            SessionStartFailure.INVALID_SDK_TOKEN -> "SDK Token is invalid"
-            SessionStartFailure.INVALID_SESSION_KEY -> "Session Key is invalid"
+        when (failure) {
+            SessionStartFailure.BELOW_MIN_API_LEVEL -> {}
+            SessionStartFailure.CONTEXT_NOT_AVAILABLE -> {}
+            SessionStartFailure.INVALID_SDK_TOKEN -> {}
+            SessionStartFailure.INVALID_SESSION_KEY -> {}
+            SessionStartFailure.POST_NOTIFICATION_PERMISSION_DENIED -> {}
+            else -> {}
         }
-        Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
+        Toast.makeText(activity.applicationContext, failure.message, Toast.LENGTH_SHORT).show()
+//        activity.finish()
         returnToJoinSessionActivity()
     }
+
 
     /**
      * To perform any operation after session ended
@@ -87,12 +92,15 @@ class ISessionCallbacks(private val activity: Activity, private val binding: Act
      * To manipulate the chat message object for addition to the chat history list and other info
      */
     override fun onMessageReceived(model: ChatModel) {
-        if (model.type == ChatModel.ChatMode.RECEIVED) {
-            binding.logView.append("\n${model.senderName}: ${model.msg}")
-            binding.logViewScrollView.postDelayed({
-                binding.logViewScrollView.fullScroll(View.FOCUS_DOWN)
-            }, 200)
+        activity. runOnUiThread {
+            (activity as MainActivity).getChatFragment().onReceived(model)
         }
+//        if (model.type == ChatModel.ChatMode.RECEIVED) {
+//            binding.logView.append("\n${model.senderName}: ${model.msg}")
+//            binding.logViewScrollView.postDelayed({
+//                binding.logViewScrollView.fullScroll(View.FOCUS_DOWN)
+//            }, 200)
+//        }
     }
 
     /**
@@ -125,6 +133,14 @@ class ISessionCallbacks(private val activity: Activity, private val binding: Act
     }
 
     /**
+     * Share name
+     * Optional
+     */
+    override fun getClientName(): String? {
+        return null
+    }
+
+    /**
      * Requesting the customer to trigger the addon download via playstore.
      */
     override fun onAddOnAvailableForDownload() {
@@ -133,7 +149,7 @@ class ISessionCallbacks(private val activity: Activity, private val binding: Act
 
     private fun returnToJoinSessionActivity() {
         if (activity.isTaskRoot) {
-            activity.startActivity(Intent(activity, JoinActivity::class.java))
+            activity.startActivity(Intent(activity, JoinActivity::class.java).setAction("your.custom.action"))
             activity.finish()
         } else {
             activity.onBackPressed()

@@ -1,3 +1,5 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Assist-Customer-Android-SDK-Demo</string>
+    <string name="send_a_message" tools:ignore="ExtraTranslation">Send a message</string>
+    <string name="session_key">Session Key</string>
 </resources>

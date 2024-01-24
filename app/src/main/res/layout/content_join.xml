@@ -15,40 +15,23 @@
         android:padding="30dp">
 
         <EditText
-            android:id="@+id/key_edittext"
+            android:id="@+id/sessionKey"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
             android:inputType="number"
             android:maxLength="10"
-            android:hint="Session Key" />
+            android:hint="@string/session_key"/>
 
 
         <EditText
-            android:id="@+id/authtoken_edittext"
+            android:id="@+id/sdkToken"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
             android:hint="Token"
-            android:visibility="visible"/>
-
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="end"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/ok_button"
-                style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:visibility="gone"
-                android:text="Ok" />
-
-        </LinearLayout>
+            tools:ignore="Deprecated"
+            />
 
         <TextView
             android:id="@+id/addonAvailabilityState"
@@ -64,6 +47,55 @@
             android:text="Check for Addon"
             android:layout_gravity="center"/>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:orientation="horizontal">
+
+            <!--<Button-->
+            <!--android:id="@+id/turn_button"-->
+            <!--style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_gravity="end"-->
+            <!--android:text="TURN only" />-->
+
+            <!--            <Button-->
+            <!--                android:id="@+id/ok_button"-->
+            <!--                style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"-->
+            <!--                android:layout_width="wrap_content"-->
+            <!--                android:layout_height="wrap_content"-->
+            <!--                android:layout_gravity="end"-->
+            <!--                android:text="Ok" />-->
+        </LinearLayout>
+
+        <RadioGroup
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            android:id="@+id/radio_group">
+            <RadioButton
+                android:id="@+id/live_option"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Live"
+                android:checked="true"
+                android:paddingLeft="40dip"/>
+            <RadioButton
+                android:id="@+id/local_option"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Local"
+                android:layout_weight="1"
+                android:checked="false"
+                android:paddingLeft="40dip" />
+
+        </RadioGroup>
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- $Id$ -->
