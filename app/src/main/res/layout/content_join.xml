@@ -14,7 +14,14 @@
         android:orientation="vertical"
         android:padding="30dp">
 
-        <EditText
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/deviceName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:hint="@string/device_name"/>
+
+        <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/sessionKey"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -24,7 +31,7 @@
             android:hint="@string/session_key"/>
 
 
-        <EditText
+        <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/sdkToken"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -50,7 +57,6 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="end"
             android:orientation="horizontal">
 
             <!--<Button-->
@@ -68,6 +74,34 @@
             <!--                android:layout_height="wrap_content"-->
             <!--                android:layout_gravity="end"-->
             <!--                android:text="Ok" />-->
+
+            <Button
+                android:id="@+id/enrollButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ENROLL" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <Button
+                android:id="@+id/joinButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="JOIN" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <Button
+                android:id="@+id/unenrollButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="UNENROLL" />
         </LinearLayout>
 
         <RadioGroup

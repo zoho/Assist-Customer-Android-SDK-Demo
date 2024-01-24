@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        tools:context=".MainActivity">
+        tools:context="com.zoho.assist.customer.demo.MainActivity">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -39,7 +39,8 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:enabled="false"
-                    android:text="Stop the session" />
+                    android:text="Stop the session"
+                    tools:ignore="HardcodedText" />
             </LinearLayout>
 
             <LinearLayout
@@ -62,6 +63,14 @@
                     android:layout_weight="1"
                     android:enabled="false"
                     android:text="Stop Share" />
+                <Button
+                    android:id="@+id/switch_Role"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:enabled="false"
+                    android:text="Switch Role" />
+
 
                 <Button
                     android:id="@+id/send_message"
@@ -92,24 +101,19 @@
 
 
         <ScrollView
-            android:id="@+id/log_view_scroll_view"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_margin="4dp"
-            android:background="@drawable/rect_border"
-            android:fadeScrollbars="false"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:visibility="gone"
+            >
 
             <TextView
-                android:id="@+id/log_view"
+                android:id="@+id/hello_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:lineSpacingExtra="4dp"
-                android:padding="4dp"
-                android:text="" />
+                android:text="Hello World!" />
         </ScrollView>
 
     </LinearLayout>
 </layout>
-
-    <!-- $Id$ -->

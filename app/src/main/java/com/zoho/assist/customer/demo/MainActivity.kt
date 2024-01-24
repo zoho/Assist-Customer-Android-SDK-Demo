@@ -17,10 +17,9 @@ import androidx.lifecycle.ViewModelProviders
 import com.zoho.assist.customer.AssistSession
 import com.zoho.assist.customer.chat.view.ChatFragment
 import com.zoho.assist.customer.chat.viewmodel.ChatViewModel
+import com.zoho.assist.customer.util.Constants
 import com.zoho.assist.customer.demo.JoinActivity.Companion.SESSION_KEY
 import com.zoho.assist.customer.demo.databinding.ActivityMainBinding
-import com.zoho.assist.customer.demo.BR
-import com.zoho.assist.customer.util.Constants
 import java.util.*
 
 @SuppressLint("Registered")
@@ -61,22 +60,11 @@ class MainActivity : AppCompatActivity() {
         viewDataBinding.executePendingBindings()
     }
 
-//    /***
-//     *
-//     */
-//    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-//        AssistSession.INSTANCE.onRequestPermissionsResult(requestCode,permissions,grantResults)
-//    }
-
-    /**
-     *
-     */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         val ack = AssistSession.INSTANCE.onActivityResult(requestCode, resultCode, data)
         resetStartStopButtons()
         if (requestCode == 100) {
-
         }
     }
 
@@ -124,12 +112,10 @@ class MainActivity : AppCompatActivity() {
         if (AssistSession.INSTANCE.isSessionAlive()) {
             callback.onSessionStarted()
             resetStartStopButtons()
-//            Toast.makeText(this, "Session in progress", Toast.LENGTH_SHORT).show()
         } else {
             if (intent != null) {
                 if (intent.getStringExtra(SESSION_KEY).isNullOrEmpty() && !AssistSession.INSTANCE.isSessionAlive()) {
-                    openSessionDialog()
-                    finish()
+                    returnToJoinSessionActivity()
                 } else if (intent.action == null) {
                     val authToken = intent.getStringExtra("AuthToken")
                     val serverURL = intent.getStringExtra("SERVER")
@@ -152,33 +138,34 @@ class MainActivity : AppCompatActivity() {
         viewDataBinding.closeSession.setOnClickListener {
 
             AssistSession.INSTANCE.onCustomerEndSession()
+
             viewDataBinding.startShare.isEnabled = false
             viewDataBinding.stopShare.isEnabled = false
             viewDataBinding.sendMessage.isEnabled = false
             viewDataBinding.startSession.isEnabled = true
             viewDataBinding.closeSession.isEnabled = false
+            viewDataBinding.switchRole.isEnabled = false
             intent.putExtra(SESSION_KEY, "")
-            openSessionDialog()
+            viewDataBinding.helloText.append("\nSession Stopped")//no i18n
+
         }
         viewDataBinding.startSession.setOnClickListener(View.OnClickListener {
             //to stop the screen sharing
 
             if (intent.getStringExtra(SESSION_KEY).isNullOrEmpty()) {
-                openSessionDialog()
-
+                returnToJoinSessionActivity()
             } else if (intent.action == null && intent.hasExtra("AuthToken")
                 && intent.hasExtra("SERVER") && intent.hasExtra(SESSION_KEY)
             ) {
                 val authToken = intent.getStringExtra("AuthToken")
                 val serverURL = intent.getStringExtra("SERVER")
-                intent.getStringExtra(SESSION_KEY)
-                    ?.let { it1 ->
-                        if (authToken != null) {
-                            if (serverURL != null) {
-                                onStartSession(it1, authToken, serverURL)
-                            }
+                intent.getStringExtra(SESSION_KEY)?.let { it1 ->
+                    if (authToken != null) {
+                        if (serverURL != null) {
+                            onStartSession(it1, authToken, serverURL)
                         }
                     }
+                }
             }
 
         })
@@ -188,6 +175,7 @@ class MainActivity : AppCompatActivity() {
              *
              */
             AssistSession.INSTANCE.onStartShare()
+            viewDataBinding.helloText.append("\n Restart Sharing")//no i18n
             viewDataBinding.startShare.isEnabled = false
             viewDataBinding.stopShare.isEnabled = true
         })
@@ -197,31 +185,45 @@ class MainActivity : AppCompatActivity() {
              *
              */
             AssistSession.INSTANCE.onStopShare()
+            viewDataBinding.helloText.append("\nStop Sharing")//no i18n
             viewDataBinding.stopShare.isEnabled = false
             viewDataBinding.startShare.isEnabled = true
+        })
+        viewDataBinding.switchRole.setOnClickListener(View.OnClickListener {
+            AssistSession.INSTANCE.onStopShare()
+            viewDataBinding.helloText.append("\nSwitchedRole")//no i18n
+            viewDataBinding.switchRole.isEnabled = true
+
+            /**
+             *
+             */
+            AssistSession.INSTANCE.onRoleChangeInitiated()
+
         })
 
         viewDataBinding.sendMessage.setOnClickListener(View.OnClickListener {
             //send a chat message to the viewers
+            viewDataBinding.helloText.append("\nSending message:: " + Date().toString())//no i18n
             var chatModel = AssistSession.INSTANCE.onSendMessage("message:: ${Date()}")
             chatFragemnt.notifyDatasetChanged()
         })
 
     }
 
-
-    private fun openSessionDialog() {
-        this@MainActivity.startActivity(Intent(this@MainActivity, JoinActivity::class.java))
-
+    private fun returnToJoinSessionActivity() {
+        if (this.isTaskRoot) {
+            val intent = Intent(this@MainActivity, JoinActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            startActivity(intent)
+            finish()
+        } else {
+            onBackPressed()
+        }
     }
 
     @SuppressLint("ServiceCast")
     private fun onStartSession(key: String, authToken: String, serverURL: String) {
-        /***
-         *
-         */
-//        AssistSession.INSTANCE.setContext(this.application.applicationContext)
-        //Assist Agent init
+
         AssistSession.INSTANCE
             .setCallbacks(callback)   //pass over an instance of class implementing SessionCallbacks.
             // All events will be triggered here. (In Background thread)
@@ -230,23 +232,17 @@ class MainActivity : AppCompatActivity() {
                 "email@emailcom"
             ) // share username and userEmail - Default value is Guest
             .setAuthToken(authToken)
-            .setBaseDomain("https://assist.zoho.com")
             .setPluginToast(true)
             .enableFloatingHead(true)
             .shareScreenOnStart(true)
             .downloadAddonOnStart(true)
             .setQuality(Constants.ColorQualityFactors.QUALITY75)
             .setKeepAliveNotification(getNotification())
-
             .start(
                 key,
                 MainActivity::class.java,
                 R.drawable.assist_flat
             ) //this represent Activity Context,
-
-//            .setBaseDomain(serverURL)
-//            .onOverlayFloating(MainActivity::class.java) //  drawable / -1
-//            .setQuality(Constants.ColorQualityFactors.QUALITY50) //(Default QUALITY to start with - 25/50/75/100)
 
     }
 
@@ -261,19 +257,28 @@ class MainActivity : AppCompatActivity() {
             )
 
             val manager = getSystemService(NotificationManager::class.java)
-            manager?.createNotificationChannel(serviceChannel)
+            manager!!.createNotificationChannel(serviceChannel)
         }
 
         val notificationIntent = Intent(this, MainActivity::class.java)
         notificationIntent.action = "com.zoho.assist.agent.main"
         notificationIntent.flags =
             Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        val pendingIntent = PendingIntent.getActivity(
-            this,
-            1427,
-            notificationIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
+        val pendingIntent = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            PendingIntent.getActivity(
+                this,
+                1427,
+                notificationIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+        } else{
+            PendingIntent.getActivity(
+                this,
+                1427,
+                notificationIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT
+            )
+        }
         val title = String.format(getApplicationName())
         val message = String.format(
             "%s is currently running and the technician can see whatever is displayed on your screen",
@@ -297,12 +302,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /***
-     *
-     *
-     */
-
     override fun onBackPressed() {
+        viewDataBinding.helloText.text = ("Back Pressed")//no i18n
         if (!AssistSession.INSTANCE.isSessionAlive()) {
             super.onBackPressed()
         } else {
@@ -313,9 +314,9 @@ class MainActivity : AppCompatActivity() {
             viewDataBinding.startSession.isEnabled = true
             viewDataBinding.closeSession.isEnabled = false
             intent.putExtra("session_key", "")
-            openSessionDialog()
+            viewDataBinding.helloText.append("\nSession Stopped")//no i18n
             viewDataBinding.startSession.visibility = View.GONE
-            finish()
+            returnToJoinSessionActivity()
         }
 
     }
