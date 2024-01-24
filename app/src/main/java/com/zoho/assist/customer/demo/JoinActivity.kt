@@ -22,7 +22,7 @@ import com.zoho.assist.customer.listener.AddonAvailabilityCallback
 import java.lang.Exception
 import java.util.logging.Level
 
-class JoinActivity : AppCompatActivity(), RadioGroup.OnCheckedChangeListener{
+class JoinActivity : AppCompatActivity() {
 
     companion object {
         const val SESSION_KEY = "Session_key"
@@ -36,7 +36,6 @@ class JoinActivity : AppCompatActivity(), RadioGroup.OnCheckedChangeListener{
         binding= ActivityJoinBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.contentLayoutId.radioGroup.setOnCheckedChangeListener(this)
         binding.contentLayoutId.sdkToken.setText(authToken)
         binding.contentLayoutId.sessionKey.setText("306236250")
         binding.fab.setOnClickListener { view ->
@@ -126,7 +125,6 @@ class JoinActivity : AppCompatActivity(), RadioGroup.OnCheckedChangeListener{
         val intent = Intent(this@JoinActivity, MainActivity::class.java)
         intent.putExtra(SESSION_KEY, sessionKey)
         intent.putExtra("AuthToken", authToken)
-        intent.putExtra("SERVER", serverURL)
         startActivity(intent)
     }
 
@@ -140,17 +138,6 @@ class JoinActivity : AppCompatActivity(), RadioGroup.OnCheckedChangeListener{
 
         }
     }
-    var serverURL="https://assist.zoho.com"
-    override fun onCheckedChanged(group: RadioGroup?, checkedId: Int) {
-        when (checkedId) {
-            R.id.live_option -> serverURL = "https://assist.zoho.com"
-            R.id.local_option -> serverURL ="https://assist.zoho.com"
-        }
-
-
-    }
-
-
 
     fun checkPermission(permission: String, requestCode: Int) {
 

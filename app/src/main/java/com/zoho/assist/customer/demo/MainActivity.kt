@@ -132,16 +132,12 @@ class MainActivity : AppCompatActivity() {
                     finish()
                 } else if (intent.action == null) {
                     val authToken = intent.getStringExtra("AuthToken")
-                    val serverURL = intent.getStringExtra("SERVER")
                     intent.getStringExtra(SESSION_KEY)?.let {
                         if (authToken != null) {
-                            if (serverURL != null) {
                                 onStartSession(
                                     it,
-                                    authToken,
-                                    serverURL
+                                    authToken
                                 )
-                            }
                         }
                     }
                 }
@@ -166,17 +162,13 @@ class MainActivity : AppCompatActivity() {
             if (intent.getStringExtra(SESSION_KEY).isNullOrEmpty()) {
                 openSessionDialog()
 
-            } else if (intent.action == null && intent.hasExtra("AuthToken")
-                && intent.hasExtra("SERVER") && intent.hasExtra(SESSION_KEY)
+            } else if (intent.action == null && intent.hasExtra("AuthToken") &&  intent.hasExtra(SESSION_KEY)
             ) {
                 val authToken = intent.getStringExtra("AuthToken")
-                val serverURL = intent.getStringExtra("SERVER")
                 intent.getStringExtra(SESSION_KEY)
                     ?.let { it1 ->
                         if (authToken != null) {
-                            if (serverURL != null) {
-                                onStartSession(it1, authToken, serverURL)
-                            }
+                                onStartSession(key=it1, authToken=authToken )
                         }
                     }
             }
@@ -216,7 +208,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     @SuppressLint("ServiceCast")
-    private fun onStartSession(key: String, authToken: String, serverURL: String) {
+    private fun onStartSession(key: String, authToken: String ) {
         /***
          *
          */
@@ -230,7 +222,6 @@ class MainActivity : AppCompatActivity() {
                 "email@emailcom"
             ) // share username and userEmail - Default value is Guest
             .setAuthToken(authToken)
-            .setBaseDomain("https://assist.zoho.com")
             .setPluginToast(true)
             .enableFloatingHead(true)
             .shareScreenOnStart(true)
