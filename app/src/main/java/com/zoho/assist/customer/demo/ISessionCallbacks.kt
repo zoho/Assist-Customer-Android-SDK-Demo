@@ -23,7 +23,8 @@ class ISessionCallbacks(private val activity: Activity, private val binding: Act
         Toast.makeText(activity, response, Toast.LENGTH_SHORT).show()
         when (responseCode) {
             AssistSession.ApiResponse.SUCCESS -> {
-                binding.logView.text = ("Validation successful") //no i18n
+                binding.logView.text = ("Validation successful")
+//                activity.onDismiss()
             }
             AssistSession.ApiResponse.ERROR -> {
                 Toast.makeText(activity, "Validation failed $response", Toast.LENGTH_SHORT).show()
@@ -120,6 +121,13 @@ class ISessionCallbacks(private val activity: Activity, private val binding: Act
      */
     override fun onScreenShareStarted() {
 //        AssistSession.INSTANCE.startAddon()
+        if (AssistSession.INSTANCE.isScreenSharing()) {
+            binding.startShare.isEnabled = false
+            binding.stopShare.isEnabled = true
+        } else {
+            binding.startShare.isEnabled = true
+            binding.stopShare.isEnabled = false
+        }
     }
 
     /**
