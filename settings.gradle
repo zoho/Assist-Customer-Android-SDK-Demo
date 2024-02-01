@@ -6,9 +6,9 @@ pluginManagement {
         gradlePluginPortal()
         jcenter()
         maven { url "https://maven.zohodl.com/"}
-        maven {
-            url = uri("https://plugins.gradle.org/m2/")
-        }
+//        maven {
+//            url = uri("https://plugins.gradle.org/m2/")
+//        }
 
     }
 }
@@ -21,9 +21,9 @@ dependencyResolutionManagement {
         gradlePluginPortal()
         jcenter()
         maven { url "https://maven.zohodl.com/"}
-        maven {
-            url = uri("https://plugins.gradle.org/m2/")
-        }
+//        maven {
+//            url = uri("https://plugins.gradle.org/m2/")
+//        }
 
     }
 }

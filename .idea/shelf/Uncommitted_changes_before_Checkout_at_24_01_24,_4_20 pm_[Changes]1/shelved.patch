@@ -1,0 +1,241 @@
+Index: app/src/main/res/layout/activity_main.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\n<layout xmlns:android=\"http://schemas.android.com/apk/res/android\"\n    xmlns:tools=\"http://schemas.android.com/tools\"\n\n    >\n    <data>\n        <import type=\"androidx.fragment.app.Fragment\"/>\n        <variable\n            name=\"chatScreenViewModel\"\n            type=\"com.zoho.assist.customer.chat.viewmodel.ChatViewModel\"/>\n    </data>\n\n    <LinearLayout\n        android:layout_width=\"match_parent\"\n        android:layout_height=\"match_parent\"\n        android:orientation=\"vertical\"\n        tools:context=\".MainActivity\">\n\n        <LinearLayout\n            android:layout_width=\"match_parent\"\n            android:layout_height=\"wrap_content\"\n            android:orientation=\"vertical\">\n\n            <LinearLayout\n                android:layout_width=\"match_parent\"\n                android:layout_height=\"wrap_content\"\n                android:orientation=\"horizontal\">\n\n                <Button\n                    android:id=\"@+id/start_session\"\n                    android:layout_width=\"wrap_content\"\n                    android:layout_height=\"wrap_content\"\n                    android:layout_weight=\"1\"\n                    android:text=\"Start Session\" />\n\n                <Button\n                    android:id=\"@+id/close_session\"\n                    android:layout_width=\"wrap_content\"\n                    android:layout_height=\"wrap_content\"\n                    android:layout_weight=\"1\"\n                    android:enabled=\"false\"\n                    android:text=\"Stop the session\" />\n            </LinearLayout>\n\n            <LinearLayout\n                android:layout_width=\"match_parent\"\n                android:layout_height=\"wrap_content\"\n                android:orientation=\"horizontal\">\n\n                <Button\n                    android:id=\"@+id/start_share\"\n                    android:layout_width=\"wrap_content\"\n                    android:layout_height=\"wrap_content\"\n                    android:layout_weight=\"1\"\n                    android:enabled=\"false\"\n                    android:text=\"Start share\" />\n\n                <Button\n                    android:id=\"@+id/stop_share\"\n                    android:layout_width=\"wrap_content\"\n                    android:layout_height=\"wrap_content\"\n                    android:layout_weight=\"1\"\n                    android:enabled=\"false\"\n                    android:text=\"Stop Share\" />\n\n                <Button\n                    android:id=\"@+id/send_message\"\n                    android:layout_width=\"wrap_content\"\n                    android:layout_height=\"wrap_content\"\n                    android:layout_weight=\"1\"\n                    android:enabled=\"false\"\n                    android:text=\"Send a message\" />\n\n            </LinearLayout>\n\n\n\n\n        </LinearLayout>\n\n        <FrameLayout\n            android:id=\"@+id/chat_container\"\n            android:layout_width=\"match_parent\"\n            android:layout_height=\"match_parent\"/>\n\n        <!--        <fragment-->\n        <!--            android:id=\"@+id/chat_container\"-->\n        <!--            android:name=\"com.zoho.assistagentlib.chat.view.ChatFragment\"-->\n        <!--            android:layout_width=\"match_parent\"-->\n        <!--            android:layout_height=\"match_parent\"-->\n        <!--            tools:layout=\"@layout/fragment_chat\"/>-->\n\n\n        <ScrollView\n            android:id=\"@+id/log_view_scroll_view\"\n            android:layout_width=\"match_parent\"\n            android:layout_height=\"0dp\"\n            android:layout_margin=\"4dp\"\n            android:background=\"@drawable/rect_border\"\n            android:fadeScrollbars=\"false\"\n            android:layout_weight=\"1\">\n\n            <TextView\n                android:id=\"@+id/log_view\"\n                android:layout_width=\"match_parent\"\n                android:layout_height=\"wrap_content\"\n                android:lineSpacingExtra=\"4dp\"\n                android:padding=\"4dp\"\n                android:text=\"\" />\n        </ScrollView>\n\n    </LinearLayout>\n</layout>\n\n    <!-- $Id$ -->
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/layout/activity_main.xml b/app/src/main/res/layout/activity_main.xml
+--- a/app/src/main/res/layout/activity_main.xml	
++++ b/app/src/main/res/layout/activity_main.xml	
+@@ -14,7 +14,7 @@
+         android:layout_width="match_parent"
+         android:layout_height="match_parent"
+         android:orientation="vertical"
+-        tools:context=".MainActivity">
++        tools:context="com.zoho.assistagentlib.MainActivity">
+ 
+         <LinearLayout
+             android:layout_width="match_parent"
+@@ -39,7 +39,8 @@
+                     android:layout_height="wrap_content"
+                     android:layout_weight="1"
+                     android:enabled="false"
+-                    android:text="Stop the session" />
++                    android:text="Stop the session"
++                    tools:ignore="HardcodedText" />
+             </LinearLayout>
+ 
+             <LinearLayout
+@@ -62,6 +63,14 @@
+                     android:layout_weight="1"
+                     android:enabled="false"
+                     android:text="Stop Share" />
++                <Button
++                    android:id="@+id/switch_Role"
++                    android:layout_width="wrap_content"
++                    android:layout_height="wrap_content"
++                    android:layout_weight="1"
++                    android:enabled="false"
++                    android:text="Switch Role" />
++
+ 
+                 <Button
+                     android:id="@+id/send_message"
+@@ -83,30 +92,19 @@
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"/>
+ 
+-        <!--        <fragment-->
+-        <!--            android:id="@+id/chat_container"-->
+-        <!--            android:name="com.zoho.assistagentlib.chat.view.ChatFragment"-->
+-        <!--            android:layout_width="match_parent"-->
+-        <!--            android:layout_height="match_parent"-->
+-        <!--            tools:layout="@layout/fragment_chat"/>-->
+-
+-
+         <ScrollView
+-            android:id="@+id/log_view_scroll_view"
+             android:layout_width="match_parent"
+             android:layout_height="0dp"
+-            android:layout_margin="4dp"
+-            android:background="@drawable/rect_border"
+-            android:fadeScrollbars="false"
+-            android:layout_weight="1">
++            android:layout_weight="1"
++            android:visibility="gone"
++            >
+ 
+             <TextView
+-                android:id="@+id/log_view"
++                android:id="@+id/hello_text"
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+                 android:lineSpacingExtra="4dp"
+-                android:padding="4dp"
+-                android:text="" />
++                android:text="Hello World!" />
+         </ScrollView>
+ 
+     </LinearLayout>
+Index: app/src/main/res/layout/content_join.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\n<androidx.constraintlayout.widget.ConstraintLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\n    xmlns:tools=\"http://schemas.android.com/tools\"\n    android:layout_width=\"match_parent\"\n    android:layout_height=\"match_parent\"\n    app:layout_behavior=\"@string/appbar_scrolling_view_behavior\"\n    tools:context=\".JoinActivity\"\n    tools:showIn=\"@layout/activity_join\">\n\n    <LinearLayout\n        android:layout_width=\"match_parent\"\n        android:layout_height=\"match_parent\"\n        android:orientation=\"vertical\"\n        android:padding=\"30dp\">\n\n        <EditText\n            android:id=\"@+id/sessionKey\"\n            android:layout_width=\"match_parent\"\n            android:layout_height=\"wrap_content\"\n            android:layout_marginBottom=\"20dp\"\n            android:inputType=\"number\"\n            android:maxLength=\"10\"\n            android:hint=\"@string/session_key\"/>\n\n\n        <EditText\n            android:id=\"@+id/sdkToken\"\n            android:layout_width=\"match_parent\"\n            android:layout_height=\"wrap_content\"\n            android:layout_marginBottom=\"20dp\"\n            android:hint=\"Token\"\n            tools:ignore=\"Deprecated\"\n            />\n\n        <TextView\n            android:id=\"@+id/addonAvailabilityState\"\n            android:layout_width=\"wrap_content\"\n            android:layout_height=\"wrap_content\"\n            android:layout_gravity=\"center\"\n            android:layout_marginBottom=\"8dp\"/>\n\n        <Button\n            android:id=\"@+id/checkAddon\"\n            android:layout_width=\"wrap_content\"\n            android:layout_height=\"wrap_content\"\n            android:text=\"Check for Addon\"\n            android:layout_gravity=\"center\"/>\n\n        <LinearLayout\n            android:layout_width=\"match_parent\"\n            android:layout_height=\"wrap_content\"\n            android:gravity=\"end\"\n            android:orientation=\"horizontal\">\n\n            <!--<Button-->\n            <!--android:id=\"@+id/turn_button\"-->\n            <!--style=\"@style/Base.Widget.AppCompat.Button.Borderless.Colored\"-->\n            <!--android:layout_width=\"wrap_content\"-->\n            <!--android:layout_height=\"wrap_content\"-->\n            <!--android:layout_gravity=\"end\"-->\n            <!--android:text=\"TURN only\" />-->\n\n            <!--            <Button-->\n            <!--                android:id=\"@+id/ok_button\"-->\n            <!--                style=\"@style/Base.Widget.AppCompat.Button.Borderless.Colored\"-->\n            <!--                android:layout_width=\"wrap_content\"-->\n            <!--                android:layout_height=\"wrap_content\"-->\n            <!--                android:layout_gravity=\"end\"-->\n            <!--                android:text=\"Ok\" />-->\n        </LinearLayout>\n\n        <RadioGroup\n            android:layout_width=\"fill_parent\"\n            android:layout_height=\"wrap_content\"\n            android:orientation=\"horizontal\"\n            android:visibility=\"gone\"\n            android:id=\"@+id/radio_group\">\n            <RadioButton\n                android:id=\"@+id/live_option\"\n                android:layout_width=\"0dp\"\n                android:layout_weight=\"1\"\n                android:layout_height=\"wrap_content\"\n                android:text=\"Live\"\n                android:checked=\"true\"\n                android:paddingLeft=\"40dip\"/>\n            <RadioButton\n                android:id=\"@+id/local_option\"\n                android:layout_width=\"0dp\"\n                android:layout_height=\"wrap_content\"\n                android:text=\"Local\"\n                android:layout_weight=\"1\"\n                android:checked=\"false\"\n                android:paddingLeft=\"40dip\" />\n\n        </RadioGroup>\n\n    </LinearLayout>\n\n</androidx.constraintlayout.widget.ConstraintLayout>\n    <!-- $Id$ -->\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/layout/content_join.xml b/app/src/main/res/layout/content_join.xml
+--- a/app/src/main/res/layout/content_join.xml	
++++ b/app/src/main/res/layout/content_join.xml	
+@@ -14,7 +14,14 @@
+         android:orientation="vertical"
+         android:padding="30dp">
+ 
+-        <EditText
++        <com.google.android.material.textfield.TextInputEditText
++            android:id="@+id/deviceName"
++            android:layout_width="match_parent"
++            android:layout_height="wrap_content"
++            android:layout_marginBottom="20dp"
++            android:hint="@string/device_name"/>
++
++        <com.google.android.material.textfield.TextInputEditText
+             android:id="@+id/sessionKey"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+@@ -24,7 +31,7 @@
+             android:hint="@string/session_key"/>
+ 
+ 
+-        <EditText
++        <com.google.android.material.textfield.TextInputEditText
+             android:id="@+id/sdkToken"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+@@ -50,7 +57,6 @@
+         <LinearLayout
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+-            android:gravity="end"
+             android:orientation="horizontal">
+ 
+             <!--<Button-->
+@@ -68,6 +74,34 @@
+             <!--                android:layout_height="wrap_content"-->
+             <!--                android:layout_gravity="end"-->
+             <!--                android:text="Ok" />-->
++
++            <Button
++                android:id="@+id/enrollButton"
++                android:layout_width="wrap_content"
++                android:layout_height="wrap_content"
++                android:text="ENROLL" />
++
++            <Space
++                android:layout_width="0dp"
++                android:layout_height="1dp"
++                android:layout_weight="1" />
++
++            <Button
++                android:id="@+id/joinButton"
++                android:layout_width="wrap_content"
++                android:layout_height="wrap_content"
++                android:text="JOIN" />
++
++            <Space
++                android:layout_width="0dp"
++                android:layout_height="1dp"
++                android:layout_weight="1" />
++
++            <Button
++                android:id="@+id/unenrollButton"
++                android:layout_width="wrap_content"
++                android:layout_height="wrap_content"
++                android:text="UNENROLL" />
+         </LinearLayout>
+ 
+         <RadioGroup
+Index: app/build.gradle
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>apply plugin: 'com.android.application'\napply plugin: 'kotlin-android'\napply plugin: 'kotlin-parcelize'\napply plugin: 'kotlin-kapt'\nandroid {\n    compileSdk 34\n    namespace \"com.zoho.assist.customer.demo\"\n    defaultConfig {\n        applicationId \"com.zoho.assist.customer.demo\"\n        minSdkVersion 21\n        targetSdkVersion 34\n        versionCode 1\n        versionName \"1.0\"\n        testInstrumentationRunner \"androidx.test.runner.AndroidJUnitRunner\"\n    }\n    compileOptions {\n        sourceCompatibility JavaVersion.VERSION_17\n        targetCompatibility = JavaVersion.VERSION_17\n    }\n    kotlinOptions {\n        jvmTarget = \"17\"\n    }\n    buildFeatures {\n        buildConfig true\n        viewBinding true\n//        compose true\n        dataBinding true\n    }\n    buildTypes {\n        release {\n            minifyEnabled false\n            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'\n        }\n    }\n}\n\nconfigurations {\n    cleanedAnnotations\n    implementation.exclude group: 'org.jetbrains' , module:'annotations'\n}\n\ndependencies {\n    implementation fileTree(dir: 'libs', include: ['*.jar'])\n    implementation \"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version\"\n    implementation 'androidx.appcompat:appcompat:1.0.2'\n    implementation 'androidx.core:core-ktx:1.0.2'\n    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'\n    implementation 'com.google.android.material:material:1.5.0'\n    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'\n    api 'com.zoho.assist:customer:1.3'\n\n    testImplementation 'junit:junit:4.12'\n    androidTestImplementation 'androidx.test.ext:junit:1.1.0'\n    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'\n\n}\n\n\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/build.gradle b/app/build.gradle
+--- a/app/build.gradle	
++++ b/app/build.gradle	
+@@ -1,30 +1,27 @@
+ apply plugin: 'com.android.application'
++
+ apply plugin: 'kotlin-android'
+-apply plugin: 'kotlin-parcelize'
+-apply plugin: 'kotlin-kapt'
++
++apply plugin: 'kotlin-android-extensions'
++
+ android {
+-    compileSdk 34
+-    namespace "com.zoho.assist.customer.demo"
++    compileSdkVersion 30
++    repositories {
++        maven {
++            url "https://maven.zohodl.com/"
++        }
++    }
+     defaultConfig {
+         applicationId "com.zoho.assist.customer.demo"
+         minSdkVersion 21
+-        targetSdkVersion 34
++        targetSdkVersion 30
+         versionCode 1
+         versionName "1.0"
+         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+     }
+-    compileOptions {
+-        sourceCompatibility JavaVersion.VERSION_17
+-        targetCompatibility = JavaVersion.VERSION_17
+-    }
+-    kotlinOptions {
+-        jvmTarget = "17"
+-    }
+-    buildFeatures {
+-        buildConfig true
+-        viewBinding true
+-//        compose true
+-        dataBinding true
++    dataBinding {
++        //noinspection DataBindingWithoutKapt
++        enabled = true
+     }
+     buildTypes {
+         release {
+@@ -34,25 +31,18 @@
+     }
+ }
+ 
+-configurations {
+-    cleanedAnnotations
+-    implementation.exclude group: 'org.jetbrains' , module:'annotations'
+-}
+-
+ dependencies {
+     implementation fileTree(dir: 'libs', include: ['*.jar'])
+     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+     implementation 'androidx.appcompat:appcompat:1.0.2'
+     implementation 'androidx.core:core-ktx:1.0.2'
+     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+-    implementation 'com.google.android.material:material:1.5.0'
+-    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+-    api 'com.zoho.assist:customer:1.3'
+-
+     testImplementation 'junit:junit:4.12'
+     androidTestImplementation 'androidx.test.ext:junit:1.1.0'
+     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+ 
++    api 'com.zoho.assist:customerEMM:1.3'
++
+ }
+ 
+ 

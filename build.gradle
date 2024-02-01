@@ -3,14 +3,14 @@
 buildscript {
     ext.kotlin_version = '1.6.10'
     ext.kotlin_compiler_extension_version = "1.5.1"
-    repositories {
-        jcenter()
-        mavenCentral()
-        google()
-        maven {
-            url "https://maven.zohodl.com/"
-        }
-    }
+//    repositories {
+//        jcenter()
+//        mavenCentral()
+//        google()
+//        maven {
+//            url "https://maven.zohodl.com/"
+//        }
+//    }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.kotlin:kotlin-android-extensions:$kotlin_version"

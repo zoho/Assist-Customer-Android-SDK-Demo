@@ -19,6 +19,11 @@ class ISessionCallbacks(private val activity: Activity, private val binding: Act
      *   param - response
      *   To perform any operation using the response from validating the token and session key
      */
+
+
+    /**
+     * Callback used to perform any operation using the response gotten from validating the token and session key.
+     */
     override fun onValidationResponse(response: String, responseCode: AssistSession.ApiResponse) {
         Toast.makeText(activity, response, Toast.LENGTH_SHORT).show()
         when (responseCode) {
@@ -133,11 +138,18 @@ class ISessionCallbacks(private val activity: Activity, private val binding: Act
     /**
      * Called when participant status changes
      */
-    override fun onParticipantStateChange(
-        participantState: ParticipantState,
-        participantName: String
-    ) {
+    override fun onParticipantStateChange(participantState: ParticipantState, participantName: String) {
+        when(participantState){
+            ParticipantState.DOWN->{
 
+            }
+            ParticipantState.LOST->{
+
+            }
+            ParticipantState.UP->{
+
+            }
+        }
     }
 
     /**
@@ -164,7 +176,9 @@ class ISessionCallbacks(private val activity: Activity, private val binding: Act
         }
     }
 
+
+
+
+
+
 }
-
-
-

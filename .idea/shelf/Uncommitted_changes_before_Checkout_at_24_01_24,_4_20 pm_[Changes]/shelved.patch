@@ -1,0 +1,844 @@
+Index: app/src/main/java/com/zoho/assist/customer/demo/JoinActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.zoho.assist.customer.demo\n\nimport android.Manifest\nimport android.app.Activity\nimport android.app.ActivityManager\nimport android.app.ProgressDialog\nimport android.content.Context\nimport android.content.Intent\nimport android.content.pm.PackageManager\nimport android.net.Uri\nimport android.os.Bundle\nimport android.util.Log\nimport android.view.inputmethod.InputMethodManager\nimport android.widget.RadioGroup\nimport android.widget.Toast\nimport androidx.appcompat.app.AppCompatActivity\nimport androidx.core.app.ActivityCompat\nimport androidx.core.content.ContextCompat\nimport com.zoho.assist.customer.AssistSession\nimport com.zoho.assist.customer.demo.databinding.ActivityJoinBinding\nimport com.zoho.assist.customer.listener.AddonAvailabilityCallback\nimport java.lang.Exception\nimport java.util.logging.Level\n\nclass JoinActivity : AppCompatActivity(), RadioGroup.OnCheckedChangeListener{\n\n    companion object {\n        const val SESSION_KEY = \"Session_key\"\n\n    }\n\n    private lateinit var binding: ActivityJoinBinding\n    var authToken=\"\"\n    override fun onCreate(savedInstanceState: Bundle?) {\n        super.onCreate(savedInstanceState)\n        binding= ActivityJoinBinding.inflate(layoutInflater)\n        setContentView(binding.root)\n\n        binding.contentLayoutId.radioGroup.setOnCheckedChangeListener(this)\n        binding.contentLayoutId.sdkToken.setText(authToken)\n        binding.contentLayoutId.sessionKey.setText(\"306236250\")\n        binding.fab.setOnClickListener { view ->\n            AssistSession.INSTANCE.setLogLevel(Level.ALL)\n            var sessionKey =  binding.contentLayoutId.sessionKey.text.toString()\n            sessionKey.let {\n                Log.i(\"Done\", sessionKey)\n                var key = if (sessionKey.isEmpty()) {\n                    \"\"\n                } else {\n                    sessionKey\n                }\n\n                if(!binding.contentLayoutId.sdkToken.text.toString().isEmpty()) {\n                    onStartSession(sessionKey, binding.contentLayoutId.sdkToken.text.toString())\n                }else{\n                    binding.contentLayoutId.sdkToken.error = \"Please enter the AuthToken\"\n                }\n                val imm = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager\n                imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0)\n            }\n        }\n        binding.contentLayoutId.checkAddon.setOnClickListener {\n            disableScreen()\n            AssistSession.INSTANCE.checkAddonAvailability(object : AddonAvailabilityCallback {\n                override fun onAddonInstalled() {\n                    binding.contentLayoutId.addonAvailabilityState.text = \"Addon already installed\"\n                    enableScreen()\n                }\n\n                override fun onAddonAvailable(addonApplicationId: String) {\n                    binding.contentLayoutId.addonAvailabilityState.text = \"Addon available : $addonApplicationId\"\n                    this@JoinActivity.startActivityForResult(\n                        Intent(\n                            Intent.ACTION_VIEW,\n                            Uri.parse(\"https://play.google.com/store/apps/details?id=${addonApplicationId}\")\n                        ), 14892\n                    )\n                    enableScreen()\n                }\n\n                override fun onAddonUnavailable() {\n                    binding.contentLayoutId.addonAvailabilityState.text = \"Addon is unavailable\"\n                    enableScreen()\n                }\n            })\n        }\n        if(ContextCompat.checkSelfPermission(this@JoinActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE).toInt()== PackageManager.PERMISSION_DENIED)\n        {\n            // Permission is not granted\n            checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, STORAGE_PERMISSION_CODE)\n        }\n\n\n\n\n    }\n\n    private fun disableScreen() {\n        binding.contentLayoutId. sessionKey.isEnabled = false\n        binding.contentLayoutId.  sdkToken.isEnabled = false\n        binding .fab.isEnabled = false\n        binding.contentLayoutId.checkAddon.isEnabled = false\n    }\n\n    private fun enableScreen() {\n        binding.contentLayoutId.sessionKey.isEnabled = true\n        binding.contentLayoutId. sdkToken.isEnabled = true\n        binding. fab.isEnabled = true\n        binding.contentLayoutId. checkAddon.isEnabled = true\n    }\n\n    private fun isMyServiceRunning(serviceClass: Class<*>): Boolean {\n        val manager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager\n        for (service in manager.getRunningServices(Integer.MAX_VALUE)) {\n            if (serviceClass.name == service.service.getClassName()) {\n                Log.i(\"isMyServiceRunning?\", true.toString() + \"\")\n                return true\n            }\n        }\n        Log.i(\"isMyServiceRunning?\", false.toString() + \"\")\n        return false\n    }\n\n\n    private fun onStartSession(sessionKey: String, authToken: String) {\n        val intent = Intent(this@JoinActivity, MainActivity::class.java)\n        intent.putExtra(SESSION_KEY, sessionKey)\n        intent.putExtra(\"AuthToken\", authToken)\n        intent.putExtra(\"SERVER\", serverURL)\n        startActivity(intent)\n    }\n\n    val progressBar: ProgressDialog? = null\n    fun onDismiss() {\n        try {\n            progressBar?.let {\n                it.dismiss()\n            }\n        } catch (ex: Exception) {\n\n        }\n    }\n    var serverURL=\"https://assist.zoho.com\"\n    override fun onCheckedChanged(group: RadioGroup?, checkedId: Int) {\n        when (checkedId) {\n            R.id.live_option -> serverURL = \"https://assist.zoho.com\"\n            R.id.local_option -> serverURL =\"https://assist.zoho.com\"\n        }\n\n\n    }\n\n\n\n    fun checkPermission(permission: String, requestCode: Int) {\n\n        // Checking if permission is not granted\n        if (ContextCompat.checkSelfPermission(this@JoinActivity, permission) == PackageManager.PERMISSION_DENIED) {\n            ActivityCompat.requestPermissions(this@JoinActivity, arrayOf(permission), requestCode)\n        } else {\n            Toast.makeText(this@JoinActivity, \"Permission already granted\", Toast.LENGTH_SHORT).show()\n        }\n    }\n    private val STORAGE_PERMISSION_CODE = 100\n    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {\n        super.onRequestPermissionsResult(requestCode, permissions, grantResults)\n        if (requestCode == STORAGE_PERMISSION_CODE ) {\n            var permission=\"Camera\"\n            if(requestCode == STORAGE_PERMISSION_CODE){\n                permission=\"STORAGE\"\n                try {\n                    if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {\n                        // Showing the toast message\n                        Toast.makeText(this@JoinActivity,\n                            \" onRequestPermissionsResult $permission Permission Granted\",\n                            Toast.LENGTH_SHORT).show()\n                    } else {\n                        Toast.makeText(this@JoinActivity,\n                            \"onRequestPermissionsResult $permission Permission Denied\",\n                            Toast.LENGTH_SHORT).show()\n                    }\n                }catch (ex: Exception){\n                    ex.printStackTrace()\n                }\n            }\n\n        }\n    }\n\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/zoho/assist/customer/demo/JoinActivity.kt b/app/src/main/java/com/zoho/assist/customer/demo/JoinActivity.kt
+--- a/app/src/main/java/com/zoho/assist/customer/demo/JoinActivity.kt	
++++ b/app/src/main/java/com/zoho/assist/customer/demo/JoinActivity.kt	
+@@ -1,49 +1,49 @@
+ package com.zoho.assist.customer.demo
+ 
+-import android.Manifest
+ import android.app.Activity
+ import android.app.ActivityManager
+ import android.app.ProgressDialog
+ import android.content.Context
+ import android.content.Intent
+-import android.content.pm.PackageManager
+ import android.net.Uri
+ import android.os.Bundle
++import android.text.Editable
++import android.text.InputType
++import android.text.method.KeyListener
+ import android.util.Log
++import android.view.KeyEvent
++import android.view.View
+ import android.view.inputmethod.InputMethodManager
+ import android.widget.RadioGroup
+ import android.widget.Toast
+ import androidx.appcompat.app.AppCompatActivity
+-import androidx.core.app.ActivityCompat
+-import androidx.core.content.ContextCompat
+ import com.zoho.assist.customer.AssistSession
+ import com.zoho.assist.customer.demo.databinding.ActivityJoinBinding
+-import com.zoho.assist.customer.listener.AddonAvailabilityCallback
+-import java.lang.Exception
++import java.util.*
+ import java.util.logging.Level
+ 
+-class JoinActivity : AppCompatActivity(), RadioGroup.OnCheckedChangeListener{
++
++class JoinActivity : AppCompatActivity(), RadioGroup.OnCheckedChangeListener, KeyListener{
+ 
+     companion object {
+         const val SESSION_KEY = "Session_key"
+-
+     }
+-
+     private lateinit var binding: ActivityJoinBinding
+-    var authToken=""
++
++
+     override fun onCreate(savedInstanceState: Bundle?) {
+         super.onCreate(savedInstanceState)
+         binding= ActivityJoinBinding.inflate(layoutInflater)
+         setContentView(binding.root)
+-
+         binding.contentLayoutId.radioGroup.setOnCheckedChangeListener(this)
+-        binding.contentLayoutId.sdkToken.setText(authToken)
+-        binding.contentLayoutId.sessionKey.setText("306236250")
+-        binding.fab.setOnClickListener { view ->
+-            AssistSession.INSTANCE.setLogLevel(Level.ALL)
+-            var sessionKey =  binding.contentLayoutId.sessionKey.text.toString()
++        binding.contentLayoutId.sdkToken.setText("wSsVR60n+hf1Ca8ozjSrde47yA5QB1v/EEV42FH16SX9F6vC8cc5lEGfDFOgTaMYEWdsQGZHprh8kRYD1DcIiNotzVlSDyiF9mqRe1U4J3x1pLnvkT7OV21dkxOILYgAwQxunQ==")
++        binding.contentLayoutId.sessionKey.setText("598413214")
++        binding.contentLayoutId.deviceName.setText("Sanjay_Testing_Device")
++        AssistSession.INSTANCE.setLogLevel(Level.ALL)
++        binding.contentLayoutId.joinButton.setOnClickListener { view ->
++            var sessionKey =    binding.contentLayoutId.sessionKey.text.toString()
+             sessionKey.let {
+-                Log.i("Done", sessionKey)
++                Log.d("Done", sessionKey)
+                 var key = if (sessionKey.isEmpty()) {
+                     ""
+                 } else {
+@@ -59,53 +59,56 @@
+                 imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0)
+             }
+         }
++
++        binding.contentLayoutId.enrollButton.setOnClickListener {
++            if(! binding.contentLayoutId.sdkToken.text.isNullOrEmpty() && ! binding.contentLayoutId.deviceName.text.isNullOrEmpty()) {
++                AssistSession.INSTANCE.enroll(BaseUrl.COM,  binding.contentLayoutId.deviceName.text.toString(), binding.contentLayoutId. sdkToken.text.toString(), object: EnrollmentCallback {
++                    override fun onEnrollmentSuccess(ursKey: String) {
++                        Toast.makeText(this@JoinActivity, "Enrolled successfully", Toast.LENGTH_SHORT).show()
++                        Log.w("FromApp Enrollment", "Success")
++                    }
++                    override fun onEnrollmentFailure(exception: Exception) {
++                        Toast.makeText(this@JoinActivity, "Failed to enroll : ${exception.message}", Toast.LENGTH_SHORT).show()
++                        exception.message?.let { it1 -> Log.w("FromApp Enrollment", it1) }
++                    }
++                })
++            }
++        }
++
++        binding.contentLayoutId.unenrollButton.setOnClickListener {
++            AssistSession.INSTANCE.unenroll(object: UnenrollmentCallback {
++                override fun onUnenrollmentSuccess() {
++                    Toast.makeText(this@JoinActivity, "Unenrolled successfully", Toast.LENGTH_SHORT).show()
++                    Log.w("FromApp Unenrollment", "Success")
++                }
++
++                override fun onUnenrollmentFailure(exception: Exception) {
++                    Toast.makeText(this@JoinActivity, "Unenrollment failed : ${exception.message}", Toast.LENGTH_SHORT).show()
++                    exception.message?.let { it1 -> Log.w("FromApp Unenrollment", it1) }
++                }
++            })
++        }
+         binding.contentLayoutId.checkAddon.setOnClickListener {
+             disableScreen()
+-            AssistSession.INSTANCE.checkAddonAvailability(object : AddonAvailabilityCallback {
+-                override fun onAddonInstalled() {
+-                    binding.contentLayoutId.addonAvailabilityState.text = "Addon already installed"
+-                    enableScreen()
+-                }
+-
+-                override fun onAddonAvailable(addonApplicationId: String) {
+-                    binding.contentLayoutId.addonAvailabilityState.text = "Addon available : $addonApplicationId"
+-                    this@JoinActivity.startActivityForResult(
+-                        Intent(
+-                            Intent.ACTION_VIEW,
+-                            Uri.parse("https://play.google.com/store/apps/details?id=${addonApplicationId}")
+-                        ), 14892
+-                    )
+-                    enableScreen()
+-                }
+-
+-                override fun onAddonUnavailable() {
+-                    binding.contentLayoutId.addonAvailabilityState.text = "Addon is unavailable"
+-                    enableScreen()
+-                }
+-            })
++            AssistSession.INSTANCE.startAddon()
+         }
+-        if(ContextCompat.checkSelfPermission(this@JoinActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE).toInt()== PackageManager.PERMISSION_DENIED)
+-        {
+-            // Permission is not granted
+-            checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, STORAGE_PERMISSION_CODE)
+-        }
+-
+-
+-
+-
+     }
+ 
+     private fun disableScreen() {
+-        binding.contentLayoutId. sessionKey.isEnabled = false
+-        binding.contentLayoutId.  sdkToken.isEnabled = false
+-        binding .fab.isEnabled = false
+-        binding.contentLayoutId.checkAddon.isEnabled = false
++        binding.contentLayoutId.sessionKey.isEnabled = false
++        binding.contentLayoutId.sdkToken.isEnabled = false
++        binding.contentLayoutId. enrollButton.isEnabled = false
++        binding.contentLayoutId.  joinButton.isEnabled = false
++        binding.contentLayoutId.   unenrollButton.isEnabled = false
++        binding.contentLayoutId.  checkAddon.isEnabled = false
+     }
+ 
+     private fun enableScreen() {
+         binding.contentLayoutId.sessionKey.isEnabled = true
+-        binding.contentLayoutId. sdkToken.isEnabled = true
+-        binding. fab.isEnabled = true
++        binding.contentLayoutId.  sdkToken.isEnabled = true
++        binding.contentLayoutId. enrollButton.isEnabled = true
++        binding.contentLayoutId. joinButton.isEnabled = true
++        binding.contentLayoutId. unenrollButton.isEnabled = true
+         binding.contentLayoutId. checkAddon.isEnabled = true
+     }
+ 
+@@ -128,13 +131,28 @@
+         intent.putExtra("AuthToken", authToken)
+         intent.putExtra("SERVER", serverURL)
+         startActivity(intent)
++//        finish()
++
+     }
+ 
+-    val progressBar: ProgressDialog? = null
++
++    fun Context.onShowLoader() {
++        progressBar = ProgressDialog(this)
++        progressBar.let {
++            progressBar!!.setMessage("Connecting....")
++            progressBar!!.setProgressStyle(ProgressDialog.STYLE_SPINNER)
++            progressBar!!.progress = 0
++            progressBar!!.max = 100
++            progressBar!!.show()
++        }
++    }
++
+     fun onDismiss() {
+         try {
+-            progressBar?.let {
+-                it.dismiss()
++            if (progressBar != null) {
++                progressBar.let {
++                    progressBar!!.dismiss()
++                }
+             }
+         } catch (ex: Exception) {
+ 
+@@ -144,47 +162,52 @@
+     override fun onCheckedChanged(group: RadioGroup?, checkedId: Int) {
+         when (checkedId) {
+             R.id.live_option -> serverURL = "https://assist.zoho.com"
+-            R.id.local_option -> serverURL ="https://assist.zoho.com"
++            R.id.local_option -> serverURL = "https://assist.localzoho.com"
+         }
+ 
+ 
+     }
+ 
+ 
++    override fun onUserLeaveHint() {
++        super.onUserLeaveHint()
++    }
++    override fun onKeyLongPress(keyCode: Int, event: KeyEvent?): Boolean {
++        return super.onKeyLongPress(keyCode, event)
++    }
+ 
+-    fun checkPermission(permission: String, requestCode: Int) {
++    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
+ 
+-        // Checking if permission is not granted
+-        if (ContextCompat.checkSelfPermission(this@JoinActivity, permission) == PackageManager.PERMISSION_DENIED) {
+-            ActivityCompat.requestPermissions(this@JoinActivity, arrayOf(permission), requestCode)
+-        } else {
+-            Toast.makeText(this@JoinActivity, "Permission already granted", Toast.LENGTH_SHORT).show()
+-        }
++        return super.onKeyUp(keyCode, event)
++    }
++
++    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
++        return super.onKeyDown(keyCode, event)
+     }
+-    private val STORAGE_PERMISSION_CODE = 100
+-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
+-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+-        if (requestCode == STORAGE_PERMISSION_CODE ) {
+-            var permission="Camera"
+-            if(requestCode == STORAGE_PERMISSION_CODE){
+-                permission="STORAGE"
+-                try {
+-                    if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+-                        // Showing the toast message
+-                        Toast.makeText(this@JoinActivity,
+-                            " onRequestPermissionsResult $permission Permission Granted",
+-                            Toast.LENGTH_SHORT).show()
+-                    } else {
+-                        Toast.makeText(this@JoinActivity,
+-                            "onRequestPermissionsResult $permission Permission Denied",
+-                            Toast.LENGTH_SHORT).show()
+-                    }
+-                }catch (ex: Exception){
+-                    ex.printStackTrace()
+-                }
+-            }
++
++    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
++        return false
++    }
++
++    override fun getInputType(): Int {
++        return  InputType.TYPE_CLASS_TEXT
++    }
++
++
++    override fun onKeyDown(p0: View?, p1: Editable?, p2: Int, event: KeyEvent?): Boolean {
++        return true
++    }
+ 
+-        }
++    override fun onKeyUp(p0: View?, p1: Editable?, p2: Int, event: KeyEvent?): Boolean {
++        return true
++    }
++
++    override fun onKeyOther(p0: View?, p1: Editable?, event: KeyEvent?): Boolean {
++        return true
+     }
++
++    override fun clearMetaKeyState(p0: View?, p1: Editable?, p2: Int) {
++    }
++
+ 
+ }
+Index: app/src/main/res/layout/activity_join.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\n<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\n    xmlns:tools=\"http://schemas.android.com/tools\"\n    android:layout_width=\"match_parent\"\n    android:layout_height=\"match_parent\"\n    tools:context=\".JoinActivity\"\n    >\n\n    <!--    <com.google.android.material.appbar.AppBarLayout-->\n    <!--        android:layout_width=\"match_parent\"-->\n    <!--        android:layout_height=\"wrap_content\"-->\n    <!--        android:theme=\"@style/AppTheme.AppBarOverlay\">-->\n\n    <!--        <androidx.appcompat.widget.Toolbar-->\n    <!--            android:id=\"@+id/toolbar\"-->\n    <!--            android:layout_width=\"match_parent\"-->\n    <!--            android:layout_height=\"?attr/actionBarSize\"-->\n    <!--            android:background=\"?attr/colorPrimary\"-->\n    <!--            app:popupTheme=\"@style/AppTheme.PopupOverlay\" />-->\n\n    <!--    </com.google.android.material.appbar.AppBarLayout>-->\n\n    <include android:id=\"@+id/content_layout_id\"\n        layout=\"@layout/content_join\" />\n\n    <com.google.android.material.floatingactionbutton.FloatingActionButton\n        android:id=\"@+id/fab\"\n        android:layout_width=\"wrap_content\"\n        android:layout_height=\"wrap_content\"\n        android:layout_gravity=\"top|end\"\n        android:layout_margin=\"@dimen/fab_margin\"\n        app:srcCompat=\"@android:drawable/ic_media_play\"\n        android:contentDescription=\"start\" />\n\n</androidx.coordinatorlayout.widget.CoordinatorLayout>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/layout/activity_join.xml b/app/src/main/res/layout/activity_join.xml
+--- a/app/src/main/res/layout/activity_join.xml	
++++ b/app/src/main/res/layout/activity_join.xml	
+@@ -6,31 +6,8 @@
+     android:layout_height="match_parent"
+     tools:context=".JoinActivity"
+     >
+-
+-    <!--    <com.google.android.material.appbar.AppBarLayout-->
+-    <!--        android:layout_width="match_parent"-->
+-    <!--        android:layout_height="wrap_content"-->
+-    <!--        android:theme="@style/AppTheme.AppBarOverlay">-->
+-
+-    <!--        <androidx.appcompat.widget.Toolbar-->
+-    <!--            android:id="@+id/toolbar"-->
+-    <!--            android:layout_width="match_parent"-->
+-    <!--            android:layout_height="?attr/actionBarSize"-->
+-    <!--            android:background="?attr/colorPrimary"-->
+-    <!--            app:popupTheme="@style/AppTheme.PopupOverlay" />-->
+-
+-    <!--    </com.google.android.material.appbar.AppBarLayout>-->
+-
+     <include android:id="@+id/content_layout_id"
+         layout="@layout/content_join" />
+ 
+-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+-        android:id="@+id/fab"
+-        android:layout_width="wrap_content"
+-        android:layout_height="wrap_content"
+-        android:layout_gravity="top|end"
+-        android:layout_margin="@dimen/fab_margin"
+-        app:srcCompat="@android:drawable/ic_media_play"
+-        android:contentDescription="start" />
+ 
+ </androidx.coordinatorlayout.widget.CoordinatorLayout>
+\ No newline at end of file
+Index: app/src/main/res/values/strings.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><resources xmlns:tools=\"http://schemas.android.com/tools\">\n    <string name=\"app_name\">Assist-Customer-Android-SDK-Demo</string>\n    <string name=\"send_a_message\" tools:ignore=\"ExtraTranslation\">Send a message</string>\n    <string name=\"session_key\">Session Key</string>\n</resources>\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
+--- a/app/src/main/res/values/strings.xml	
++++ b/app/src/main/res/values/strings.xml	
+@@ -1,5 +1,5 @@
+-<resources xmlns:tools="http://schemas.android.com/tools">
++<resources>
+     <string name="app_name">Assist-Customer-Android-SDK-Demo</string>
+-    <string name="send_a_message" tools:ignore="ExtraTranslation">Send a message</string>
+     <string name="session_key">Session Key</string>
++    <string name="device_name">Device Name</string>
+ </resources>
+Index: .idea/misc.xml
+===================================================================
+diff --git a/.idea/misc.xml b/.idea/misc.xml
+new file mode 100644
+--- /dev/null	
++++ b/.idea/misc.xml	
+@@ -0,0 +1,8 @@
++<project version="4">
++  <component name="ProjectRootManager" version="2" languageLevel="JDK_17" default="true" project-jdk-name="jbr-17" project-jdk-type="JavaSDK">
++    <output url="file://$PROJECT_DIR$/build/classes" />
++  </component>
++  <component name="ProjectType">
++    <option name="id" value="Android" />
++  </component>
++</project>
+\ No newline at end of file
+Index: app/src/main/java/com/zoho/assist/customer/demo/ISessionCallbacks.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.zoho.assist.customer.demo\n\nimport android.app.Activity\nimport android.content.Intent\nimport android.view.View\nimport android.widget.Toast\nimport com.zoho.assist.customer.AssistSession\nimport com.zoho.assist.customer.SessionCallbacks\nimport com.zoho.assist.customer.SessionStartFailure\nimport com.zoho.assist.customer.demo.databinding.ActivityMainBinding\nimport com.zoho.assist.customer.model.ChatModel\nimport com.zoho.assist.customer.model.ParticipantState\n\n\nclass ISessionCallbacks(private val activity: Activity, private val binding: ActivityMainBinding) :\n    SessionCallbacks {\n\n    /**\n     *   param - response\n     *   To perform any operation using the response from validating the token and session key\n     */\n    override fun onValidationResponse(response: String, responseCode: AssistSession.ApiResponse) {\n        Toast.makeText(activity, response, Toast.LENGTH_SHORT).show()\n        when (responseCode) {\n            AssistSession.ApiResponse.SUCCESS -> {\n                binding.logView.text = (\"Validation successful\")\n//                activity.onDismiss()\n            }\n            AssistSession.ApiResponse.ERROR -> {\n                Toast.makeText(activity, \"Validation failed $response\", Toast.LENGTH_SHORT).show()\n                returnToJoinSessionActivity()\n            }\n        }\n    }\n\n    /**\n     * To perform any operation when session gets connected successfully\n     */\n    override fun onSessionStarted() {\n        binding.logView.append(\"\\nStarting Session\")//no i18n\n        binding.closeSession.isEnabled = true\n        binding.sendMessage.isEnabled = true\n        binding.startSession.isEnabled = false\n        if (AssistSession.INSTANCE.isScreenSharing()) {\n            binding.startShare.isEnabled = false\n            binding.stopShare.isEnabled = true\n        } else {\n            binding.startShare.isEnabled = true\n            binding.stopShare.isEnabled = false\n        }\n    }\n\n    /**\n     * To handle session start failure cases\n     */\n\n    override fun onSessionStartFailed(failure: SessionStartFailure) {\n        when (failure) {\n            SessionStartFailure.BELOW_MIN_API_LEVEL -> {}\n            SessionStartFailure.CONTEXT_NOT_AVAILABLE -> {}\n            SessionStartFailure.INVALID_SDK_TOKEN -> {}\n            SessionStartFailure.INVALID_SESSION_KEY -> {}\n            SessionStartFailure.POST_NOTIFICATION_PERMISSION_DENIED -> {}\n            else -> {}\n        }\n        Toast.makeText(activity.applicationContext, failure.message, Toast.LENGTH_SHORT).show()\n//        activity.finish()\n        returnToJoinSessionActivity()\n    }\n\n\n    /**\n     * To perform any operation after session ended\n     */\n    override fun onSessionEnded() {\n        binding.logView.append(\"\\nSession Ended\")//no i18n\n        returnToJoinSessionActivity()\n    }\n\n    /**\n     * To request screen share manually if not enabled in shareScreenOnStart\n     */\n    override fun onScreenShareRequest() {\n        /**\n         * true - Approve\n         * false - Reject\n         */\n        AssistSession.INSTANCE.startScreenSharing(true)\n    }\n\n    /**\n     *  param - chatModel\n     * To manipulate the chat message object for addition to the chat history list and other info\n     */\n    override fun onMessageReceived(model: ChatModel) {\n        activity. runOnUiThread {\n            (activity as MainActivity).getChatFragment().onReceived(model)\n        }\n//        if (model.type == ChatModel.ChatMode.RECEIVED) {\n//            binding.logView.append(\"\\n${model.senderName}: ${model.msg}\")\n//            binding.logViewScrollView.postDelayed({\n//                binding.logViewScrollView.fullScroll(View.FOCUS_DOWN)\n//            }, 200)\n//        }\n    }\n\n    /**\n     * Switch the role of customer into technician\n     */\n    override fun onRoleChangeRequest() {\n        /**\n         * true - Approve\n         * false - Reject\n         */\n        AssistSession.INSTANCE.onRoleChangeRequestAccepted(true)\n    }\n\n    /**\n     * Called when screen share is started, and can be used in conjunction\n     * with `startRemoteControlOnStart(false)` to prompt user for remote control permission\n     */\n    override fun onScreenShareStarted() {\n//        AssistSession.INSTANCE.startAddon()\n        if (AssistSession.INSTANCE.isScreenSharing()) {\n            binding.startShare.isEnabled = false\n            binding.stopShare.isEnabled = true\n        } else {\n            binding.startShare.isEnabled = true\n            binding.stopShare.isEnabled = false\n        }\n    }\n\n    /**\n     * Called when participant status changes\n     */\n    override fun onParticipantStateChange(\n        participantState: ParticipantState,\n        participantName: String\n    ) {\n\n    }\n\n    /**\n     * Share name\n     * Optional\n     */\n    override fun getClientName(): String? {\n        return null\n    }\n\n    /**\n     * Requesting the customer to trigger the addon download via playstore.\n     */\n    override fun onAddOnAvailableForDownload() {\n        AssistSession.INSTANCE.startAddon()\n    }\n\n    private fun returnToJoinSessionActivity() {\n        if (activity.isTaskRoot) {\n            activity.startActivity(Intent(activity, JoinActivity::class.java).setAction(\"your.custom.action\"))\n            activity.finish()\n        } else {\n            activity.onBackPressed()\n        }\n    }\n\n}\n\n\n\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/zoho/assist/customer/demo/ISessionCallbacks.kt b/app/src/main/java/com/zoho/assist/customer/demo/ISessionCallbacks.kt
+--- a/app/src/main/java/com/zoho/assist/customer/demo/ISessionCallbacks.kt	
++++ b/app/src/main/java/com/zoho/assist/customer/demo/ISessionCallbacks.kt	
+@@ -23,8 +23,7 @@
+         Toast.makeText(activity, response, Toast.LENGTH_SHORT).show()
+         when (responseCode) {
+             AssistSession.ApiResponse.SUCCESS -> {
+-                binding.logView.text = ("Validation successful")
+-//                activity.onDismiss()
++                binding.logView.text = ("Validation successful") //no i18n
+             }
+             AssistSession.ApiResponse.ERROR -> {
+                 Toast.makeText(activity, "Validation failed $response", Toast.LENGTH_SHORT).show()
+@@ -53,22 +52,20 @@
+     /**
+      * To handle session start failure cases
+      */
+-
+     override fun onSessionStartFailed(failure: SessionStartFailure) {
+         when (failure) {
+             SessionStartFailure.BELOW_MIN_API_LEVEL -> {}
+             SessionStartFailure.CONTEXT_NOT_AVAILABLE -> {}
+             SessionStartFailure.INVALID_SDK_TOKEN -> {}
+             SessionStartFailure.INVALID_SESSION_KEY -> {}
+-            SessionStartFailure.POST_NOTIFICATION_PERMISSION_DENIED -> {}
+-            else -> {}
++            else -> {
++
++            }
+         }
+         Toast.makeText(activity.applicationContext, failure.message, Toast.LENGTH_SHORT).show()
+-//        activity.finish()
+         returnToJoinSessionActivity()
+     }
+ 
+-
+     /**
+      * To perform any operation after session ended
+      */
+@@ -93,15 +90,12 @@
+      * To manipulate the chat message object for addition to the chat history list and other info
+      */
+     override fun onMessageReceived(model: ChatModel) {
+-        activity. runOnUiThread {
+-            (activity as MainActivity).getChatFragment().onReceived(model)
++        if (model.type == ChatModel.ChatMode.RECEIVED) {
++            binding.logView.append("\n${model.senderName}: ${model.msg}")
++            binding.logViewScrollView.postDelayed({
++                binding.logViewScrollView.fullScroll(View.FOCUS_DOWN)
++            }, 200)
+         }
+-//        if (model.type == ChatModel.ChatMode.RECEIVED) {
+-//            binding.logView.append("\n${model.senderName}: ${model.msg}")
+-//            binding.logViewScrollView.postDelayed({
+-//                binding.logViewScrollView.fullScroll(View.FOCUS_DOWN)
+-//            }, 200)
+-//        }
+     }
+ 
+     /**
+@@ -120,7 +114,7 @@
+      * with `startRemoteControlOnStart(false)` to prompt user for remote control permission
+      */
+     override fun onScreenShareStarted() {
+-//        AssistSession.INSTANCE.startAddon()
++        // Show prompt for starting addon if needed.
+         if (AssistSession.INSTANCE.isScreenSharing()) {
+             binding.startShare.isEnabled = false
+             binding.stopShare.isEnabled = true
+@@ -140,12 +134,8 @@
+ 
+     }
+ 
+-    /**
+-     * Share name
+-     * Optional
+-     */
+     override fun getClientName(): String? {
+-        return null
++       return null
+     }
+ 
+     /**
+@@ -157,7 +147,7 @@
+ 
+     private fun returnToJoinSessionActivity() {
+         if (activity.isTaskRoot) {
+-            activity.startActivity(Intent(activity, JoinActivity::class.java).setAction("your.custom.action"))
++            activity.startActivity(Intent(activity, JoinActivity::class.java))
+             activity.finish()
+         } else {
+             activity.onBackPressed()
+Index: .idea/migrations.xml
+===================================================================
+diff --git a/.idea/migrations.xml b/.idea/migrations.xml
+new file mode 100644
+--- /dev/null	
++++ b/.idea/migrations.xml	
+@@ -0,0 +1,10 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="ProjectMigrations">
++    <option name="MigrateToGradleLocalJavaHome">
++      <set>
++        <option value="$PROJECT_DIR$" />
++      </set>
++    </option>
++  </component>
++</project>
+\ No newline at end of file
+Index: .idea/jarRepositories.xml
+===================================================================
+diff --git a/.idea/jarRepositories.xml b/.idea/jarRepositories.xml
+new file mode 100644
+--- /dev/null	
++++ b/.idea/jarRepositories.xml	
+@@ -0,0 +1,35 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="RemoteRepositoriesConfiguration">
++    <remote-repository>
++      <option name="id" value="central" />
++      <option name="name" value="Maven Central repository" />
++      <option name="url" value="https://repo1.maven.org/maven2" />
++    </remote-repository>
++    <remote-repository>
++      <option name="id" value="jboss.community" />
++      <option name="name" value="JBoss Community repository" />
++      <option name="url" value="https://repository.jboss.org/nexus/content/repositories/public/" />
++    </remote-repository>
++    <remote-repository>
++      <option name="id" value="BintrayJCenter" />
++      <option name="name" value="BintrayJCenter" />
++      <option name="url" value="https://jcenter.bintray.com/" />
++    </remote-repository>
++    <remote-repository>
++      <option name="id" value="Google" />
++      <option name="name" value="Google" />
++      <option name="url" value="https://dl.google.com/dl/android/maven2/" />
++    </remote-repository>
++    <remote-repository>
++      <option name="id" value="maven" />
++      <option name="name" value="maven" />
++      <option name="url" value="https://maven.zohodl.com/" />
++    </remote-repository>
++    <remote-repository>
++      <option name="id" value="MavenRepo" />
++      <option name="name" value="MavenRepo" />
++      <option name="url" value="https://repo.maven.apache.org/maven2/" />
++    </remote-repository>
++  </component>
++</project>
+\ No newline at end of file
+Index: .idea/deploymentTargetDropDown.xml
+===================================================================
+diff --git a/.idea/deploymentTargetDropDown.xml b/.idea/deploymentTargetDropDown.xml
+new file mode 100644
+--- /dev/null	
++++ b/.idea/deploymentTargetDropDown.xml	
+@@ -0,0 +1,10 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="deploymentTargetDropDown">
++    <value>
++      <entry key="app">
++        <State />
++      </entry>
++    </value>
++  </component>
++</project>
+\ No newline at end of file
+Index: app/src/main/java/com/zoho/assist/customer/demo/MainActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.zoho.assist.customer.demo\n\nimport android.annotation.SuppressLint\nimport android.app.Notification\nimport android.app.NotificationChannel\nimport android.app.NotificationManager\nimport android.app.PendingIntent\nimport android.content.Intent\nimport android.os.Build\nimport android.os.Bundle\nimport android.view.View\nimport androidx.appcompat.app.AppCompatActivity\nimport androidx.core.app.NotificationCompat\nimport androidx.databinding.DataBindingUtil\nimport androidx.lifecycle.AndroidViewModel\nimport androidx.lifecycle.ViewModelProviders\nimport com.zoho.assist.customer.AssistSession\nimport com.zoho.assist.customer.chat.view.ChatFragment\nimport com.zoho.assist.customer.chat.viewmodel.ChatViewModel\nimport com.zoho.assist.customer.demo.JoinActivity.Companion.SESSION_KEY\nimport com.zoho.assist.customer.demo.databinding.ActivityMainBinding\nimport com.zoho.assist.customer.demo.BR\nimport com.zoho.assist.customer.util.Constants\nimport java.util.*\n\n@SuppressLint(\"Registered\")\nclass MainActivity : AppCompatActivity() {\n\n    private lateinit var chatFragemnt: ChatFragment\n    lateinit var viewDataBinding: ActivityMainBinding\n    private val viewModelClass: Class<ChatViewModel>\n        get() = ChatViewModel::class.java\n\n    private val viewModel: AndroidViewModel by lazy {\n        ViewModelProviders.of(this).get(viewModelClass)\n    }\n\n\n    override fun onNewIntent(intent: Intent?) {\n        super.onNewIntent(intent)\n\n    }\n\n    override fun onCreate(savedInstanceState: Bundle?) {\n        super.onCreate(savedInstanceState)\n        viewDataBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)\n        callback = ISessionCallbacks(this, viewDataBinding)\n        /**\n         *  callback - Retains the callback instance\n         */\n        AssistSession.INSTANCE.onCreate(this, callback)\n\n        val result = viewDataBinding.setVariable(BR.chatScreenViewModel, viewModel)\n        if (!result) {\n            throw RuntimeException(\"ViewModel variable not set. Check the types\")\n        }\n        chatFragemnt = ChatFragment()\n        supportFragmentManager.beginTransaction().replace(R.id.chat_container, getChatFragment())\n            .commit()\n        onViewCreate(savedInstanceState)\n        viewDataBinding.executePendingBindings()\n    }\n\n//    /***\n//     *\n//     */\n//    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {\n//        AssistSession.INSTANCE.onRequestPermissionsResult(requestCode,permissions,grantResults)\n//    }\n\n    /**\n     *\n     */\n    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {\n        super.onActivityResult(requestCode, resultCode, data)\n        val ack = AssistSession.INSTANCE.onActivityResult(requestCode, resultCode, data)\n        resetStartStopButtons()\n        if (requestCode == 100) {\n\n        }\n    }\n\n    /**\n     * ===============================================================================\n     * onStop(), onResume() are needed only when the Floating Head feature is enabled\n     *\n     *\n     */\n\n    /**\n     * Called when the app is no longer visible to the user\n     */\n\n    override fun onStop() {\n        super.onStop()\n        AssistSession.INSTANCE.onStop()\n    }\n\n    /**\n     *Called after your app starts interacting with the user. This is an indicator that the app became active and visible to the user.\n     */\n    override fun onResume() {\n        super.onResume()\n        AssistSession.INSTANCE.onResume()\n    }\n\n    /**\n     * ===============================================================================\n     */\n\n    private lateinit var callback: ISessionCallbacks\n\n    private fun resetStartStopButtons() {\n        if (AssistSession.INSTANCE.isScreenSharing()) {\n            viewDataBinding.startShare.isEnabled = false\n            viewDataBinding.stopShare.isEnabled = true\n        } else {\n            viewDataBinding.startShare.isEnabled = true\n            viewDataBinding.stopShare.isEnabled = false\n        }\n    }\n\n    private fun onViewCreate(savedInstanceState: Bundle?) {\n        if (AssistSession.INSTANCE.isSessionAlive()) {\n            callback.onSessionStarted()\n            resetStartStopButtons()\n//            Toast.makeText(this, \"Session in progress\", Toast.LENGTH_SHORT).show()\n        } else {\n            if (intent != null) {\n                if (intent.getStringExtra(SESSION_KEY).isNullOrEmpty() && !AssistSession.INSTANCE.isSessionAlive()) {\n                    openSessionDialog()\n                    finish()\n                } else if (intent.action == null) {\n                    val authToken = intent.getStringExtra(\"AuthToken\")\n                    val serverURL = intent.getStringExtra(\"SERVER\")\n                    intent.getStringExtra(SESSION_KEY)?.let {\n                        if (authToken != null) {\n                            if (serverURL != null) {\n                                onStartSession(\n                                    it,\n                                    authToken,\n                                    serverURL\n                                )\n                            }\n                        }\n                    }\n                }\n            }\n        }\n\n        //click listeners\n        viewDataBinding.closeSession.setOnClickListener {\n\n            AssistSession.INSTANCE.onCustomerEndSession()\n            viewDataBinding.startShare.isEnabled = false\n            viewDataBinding.stopShare.isEnabled = false\n            viewDataBinding.sendMessage.isEnabled = false\n            viewDataBinding.startSession.isEnabled = true\n            viewDataBinding.closeSession.isEnabled = false\n            intent.putExtra(SESSION_KEY, \"\")\n            openSessionDialog()\n        }\n        viewDataBinding.startSession.setOnClickListener(View.OnClickListener {\n            //to stop the screen sharing\n\n            if (intent.getStringExtra(SESSION_KEY).isNullOrEmpty()) {\n                openSessionDialog()\n\n            } else if (intent.action == null && intent.hasExtra(\"AuthToken\")\n                && intent.hasExtra(\"SERVER\") && intent.hasExtra(SESSION_KEY)\n            ) {\n                val authToken = intent.getStringExtra(\"AuthToken\")\n                val serverURL = intent.getStringExtra(\"SERVER\")\n                intent.getStringExtra(SESSION_KEY)\n                    ?.let { it1 ->\n                        if (authToken != null) {\n                            if (serverURL != null) {\n                                onStartSession(it1, authToken, serverURL)\n                            }\n                        }\n                    }\n            }\n\n        })\n\n        viewDataBinding.startShare.setOnClickListener(View.OnClickListener {\n            /***\n             *\n             */\n            AssistSession.INSTANCE.onStartShare()\n            viewDataBinding.startShare.isEnabled = false\n            viewDataBinding.stopShare.isEnabled = true\n        })\n\n        viewDataBinding.stopShare.setOnClickListener(View.OnClickListener {\n            /**\n             *\n             */\n            AssistSession.INSTANCE.onStopShare()\n            viewDataBinding.stopShare.isEnabled = false\n            viewDataBinding.startShare.isEnabled = true\n        })\n\n        viewDataBinding.sendMessage.setOnClickListener(View.OnClickListener {\n            //send a chat message to the viewers\n            var chatModel = AssistSession.INSTANCE.onSendMessage(\"message:: ${Date()}\")\n            chatFragemnt.notifyDatasetChanged()\n        })\n\n    }\n\n\n    private fun openSessionDialog() {\n        this@MainActivity.startActivity(Intent(this@MainActivity, JoinActivity::class.java))\n\n    }\n\n    @SuppressLint(\"ServiceCast\")\n    private fun onStartSession(key: String, authToken: String, serverURL: String) {\n        /***\n         *\n         */\n//        AssistSession.INSTANCE.setContext(this.application.applicationContext)\n        //Assist Agent init\n        AssistSession.INSTANCE\n            .setCallbacks(callback)   //pass over an instance of class implementing SessionCallbacks.\n            // All events will be triggered here. (In Background thread)\n            .setCustomerDetails(\n                \"surendran\",\n                \"email@emailcom\"\n            ) // share username and userEmail - Default value is Guest\n            .setAuthToken(authToken)\n            .setBaseDomain(\"https://assist.zoho.com\")\n            .setPluginToast(true)\n            .enableFloatingHead(true)\n            .shareScreenOnStart(true)\n            .downloadAddonOnStart(true)\n            .setQuality(Constants.ColorQualityFactors.QUALITY75)\n            .setKeepAliveNotification(getNotification())\n\n            .start(\n                key,\n                MainActivity::class.java,\n                R.drawable.assist_flat\n            ) //this represent Activity Context,\n\n//            .setBaseDomain(serverURL)\n//            .onOverlayFloating(MainActivity::class.java) //  drawable / -1\n//            .setQuality(Constants.ColorQualityFactors.QUALITY50) //(Default QUALITY to start with - 25/50/75/100)\n\n    }\n\n    fun getNotification(): Notification? {\n        val channelId = getString(com.zoho.assist.customer.R.string.miscellaneous)\n        val channelName = getString(com.zoho.assist.customer.R.string.miscellaneous)\n        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {\n            val serviceChannel = NotificationChannel(\n                channelId,\n                channelName,\n                NotificationManager.IMPORTANCE_DEFAULT\n            )\n\n            val manager = getSystemService(NotificationManager::class.java)\n            manager?.createNotificationChannel(serviceChannel)\n        }\n\n        val notificationIntent = Intent(this, MainActivity::class.java)\n        notificationIntent.action = \"com.zoho.assist.agent.main\"\n        notificationIntent.flags =\n            Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK\n        val pendingIntent = PendingIntent.getActivity(\n            this,\n            1427,\n            notificationIntent,\n            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE\n        )\n        val title = String.format(getApplicationName())\n        val message = String.format(\n            \"%s is currently running and the technician can see whatever is displayed on your screen\",\n            getApplicationName()\n        )\n        return NotificationCompat.Builder(this, channelId)\n            .setContentTitle(title)\n            .setContentText(message)\n            .setSmallIcon(com.zoho.assist.customer.R.drawable.assist_flat)\n            .setContentIntent(pendingIntent)\n            .build()\n    }\n\n    private fun getApplicationName(): String {\n        return try {\n            val applicationInfo = applicationInfo\n            val stringId = applicationInfo.labelRes\n            if (stringId == 0) applicationInfo.nonLocalizedLabel.toString() else getString(stringId)\n        } catch (ex: Exception) {\n            \"\"\n        }\n    }\n\n    /***\n     *\n     *\n     */\n\n    override fun onBackPressed() {\n        if (!AssistSession.INSTANCE.isSessionAlive()) {\n            super.onBackPressed()\n        } else {\n            AssistSession.INSTANCE.onCustomerEndSession()\n            viewDataBinding.startShare.isEnabled = false\n            viewDataBinding.stopShare.isEnabled = false\n            viewDataBinding.sendMessage.isEnabled = false\n            viewDataBinding.startSession.isEnabled = true\n            viewDataBinding.closeSession.isEnabled = false\n            intent.putExtra(\"session_key\", \"\")\n            openSessionDialog()\n            viewDataBinding.startSession.visibility = View.GONE\n            finish()\n        }\n\n    }\n\n    fun getChatFragment(): ChatFragment {\n        return chatFragemnt\n    }\n\n}\n\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/zoho/assist/customer/demo/MainActivity.kt b/app/src/main/java/com/zoho/assist/customer/demo/MainActivity.kt
+--- a/app/src/main/java/com/zoho/assist/customer/demo/MainActivity.kt	
++++ b/app/src/main/java/com/zoho/assist/customer/demo/MainActivity.kt	
+@@ -18,9 +18,7 @@
+ import com.zoho.assist.customer.chat.view.ChatFragment
+ import com.zoho.assist.customer.chat.viewmodel.ChatViewModel
+ import com.zoho.assist.customer.demo.JoinActivity.Companion.SESSION_KEY
+-import com.zoho.assist.customer.demo.databinding.ActivityMainBinding
+-import com.zoho.assist.customer.demo.BR
+-import com.zoho.assist.customer.util.Constants
++import com.zoho.assistagentlib.databinding.ActivityMainBinding
+ import java.util.*
+ 
+ @SuppressLint("Registered")
+@@ -61,22 +59,11 @@
+         viewDataBinding.executePendingBindings()
+     }
+ 
+-//    /***
+-//     *
+-//     */
+-//    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+-//        AssistSession.INSTANCE.onRequestPermissionsResult(requestCode,permissions,grantResults)
+-//    }
+-
+-    /**
+-     *
+-     */
+     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+         super.onActivityResult(requestCode, resultCode, data)
+         val ack = AssistSession.INSTANCE.onActivityResult(requestCode, resultCode, data)
+         resetStartStopButtons()
+         if (requestCode == 100) {
+-
+         }
+     }
+ 
+@@ -124,12 +111,10 @@
+         if (AssistSession.INSTANCE.isSessionAlive()) {
+             callback.onSessionStarted()
+             resetStartStopButtons()
+-//            Toast.makeText(this, "Session in progress", Toast.LENGTH_SHORT).show()
+         } else {
+             if (intent != null) {
+                 if (intent.getStringExtra(SESSION_KEY).isNullOrEmpty() && !AssistSession.INSTANCE.isSessionAlive()) {
+-                    openSessionDialog()
+-                    finish()
++                    returnToJoinSessionActivity()
+                 } else if (intent.action == null) {
+                     val authToken = intent.getStringExtra("AuthToken")
+                     val serverURL = intent.getStringExtra("SERVER")
+@@ -152,33 +137,34 @@
+         viewDataBinding.closeSession.setOnClickListener {
+ 
+             AssistSession.INSTANCE.onCustomerEndSession()
++
+             viewDataBinding.startShare.isEnabled = false
+             viewDataBinding.stopShare.isEnabled = false
+             viewDataBinding.sendMessage.isEnabled = false
+             viewDataBinding.startSession.isEnabled = true
+             viewDataBinding.closeSession.isEnabled = false
++            viewDataBinding.switchRole.isEnabled = false
+             intent.putExtra(SESSION_KEY, "")
+-            openSessionDialog()
++            viewDataBinding.helloText.append("\nSession Stopped")//no i18n
++
+         }
+         viewDataBinding.startSession.setOnClickListener(View.OnClickListener {
+             //to stop the screen sharing
+ 
+             if (intent.getStringExtra(SESSION_KEY).isNullOrEmpty()) {
+-                openSessionDialog()
+-
++                returnToJoinSessionActivity()
+             } else if (intent.action == null && intent.hasExtra("AuthToken")
+                 && intent.hasExtra("SERVER") && intent.hasExtra(SESSION_KEY)
+             ) {
+                 val authToken = intent.getStringExtra("AuthToken")
+                 val serverURL = intent.getStringExtra("SERVER")
+-                intent.getStringExtra(SESSION_KEY)
+-                    ?.let { it1 ->
+-                        if (authToken != null) {
+-                            if (serverURL != null) {
+-                                onStartSession(it1, authToken, serverURL)
+-                            }
+-                        }
+-                    }
++                intent.getStringExtra(SESSION_KEY)?.let { it1 ->
++                    if (authToken != null) {
++                        if (serverURL != null) {
++                            onStartSession(it1, authToken, serverURL)
++                        }
++                    }
++                }
+             }
+ 
+         })
+@@ -188,6 +174,7 @@
+              *
+              */
+             AssistSession.INSTANCE.onStartShare()
++            viewDataBinding.helloText.append("\n Restart Sharing")//no i18n
+             viewDataBinding.startShare.isEnabled = false
+             viewDataBinding.stopShare.isEnabled = true
+         })
+@@ -197,22 +184,49 @@
+              *
+              */
+             AssistSession.INSTANCE.onStopShare()
++            viewDataBinding.helloText.append("\nStop Sharing")//no i18n
+             viewDataBinding.stopShare.isEnabled = false
+             viewDataBinding.startShare.isEnabled = true
+         })
++        viewDataBinding.switchRole.setOnClickListener(View.OnClickListener {
++            AssistSession.INSTANCE.onStopShare()
++            viewDataBinding.helloText.append("\nSwitchedRole")//no i18n
++            viewDataBinding.switchRole.isEnabled = true
++
++            /**
++             *
++             */
++            AssistSession.INSTANCE.onRoleChangeInitiated()
++
++        })
+ 
+         viewDataBinding.sendMessage.setOnClickListener(View.OnClickListener {
+             //send a chat message to the viewers
++            viewDataBinding.helloText.append("\nSending message:: " + Date().toString())//no i18n
+             var chatModel = AssistSession.INSTANCE.onSendMessage("message:: ${Date()}")
+             chatFragemnt.notifyDatasetChanged()
++//              or
++//              val chatModel =  AssistSession.INSTANCE.getUserName()?.let { it1 ->
++//                  ChatModel(it1, "message:: ${Date().toString()}", Date(System.currentTimeMillis()), ChatModel.ChatMode.SENT)
++//              }
++//              with(chatFragemnt) {
++//                  if (chatModel != null) {
++//                      addNewChat(chatModel)
++//                  }
++//              }
+         })
+ 
+     }
+ 
+-
+-    private fun openSessionDialog() {
+-        this@MainActivity.startActivity(Intent(this@MainActivity, JoinActivity::class.java))
+-
++    private fun returnToJoinSessionActivity() {
++        if (this.isTaskRoot) {
++            val intent = Intent(this@MainActivity, JoinActivity::class.java)
++            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
++            startActivity(intent)
++            finish()
++        } else {
++            onBackPressed()
++        }
+     }
+ 
+     @SuppressLint("ServiceCast")
+@@ -222,22 +236,23 @@
+          */
+ //        AssistSession.INSTANCE.setContext(this.application.applicationContext)
+         //Assist Agent init
++
+         AssistSession.INSTANCE
++
+             .setCallbacks(callback)   //pass over an instance of class implementing SessionCallbacks.
+             // All events will be triggered here. (In Background thread)
+             .setCustomerDetails(
+                 "surendran",
+                 "email@emailcom"
+             ) // share username and userEmail - Default value is Guest
++//            .setBaseDomain("https://assisturs1.localzoho.com")
+             .setAuthToken(authToken)
+-            .setBaseDomain("https://assist.zoho.com")
+             .setPluginToast(true)
+             .enableFloatingHead(true)
+             .shareScreenOnStart(true)
+             .downloadAddonOnStart(true)
+-            .setQuality(Constants.ColorQualityFactors.QUALITY75)
++//            .setQuality(ColorQualityFactors.QUALITY75)
+             .setKeepAliveNotification(getNotification())
+-
+             .start(
+                 key,
+                 MainActivity::class.java,
+@@ -261,19 +276,28 @@
+             )
+ 
+             val manager = getSystemService(NotificationManager::class.java)
+-            manager?.createNotificationChannel(serviceChannel)
++            manager!!.createNotificationChannel(serviceChannel)
+         }
+ 
+         val notificationIntent = Intent(this, MainActivity::class.java)
+         notificationIntent.action = "com.zoho.assist.agent.main"
+         notificationIntent.flags =
+             Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+-        val pendingIntent = PendingIntent.getActivity(
+-            this,
+-            1427,
+-            notificationIntent,
+-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+-        )
++        val pendingIntent = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
++            PendingIntent.getActivity(
++                this,
++                1427,
++                notificationIntent,
++                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
++            )
++        } else{
++            PendingIntent.getActivity(
++                this,
++                1427,
++                notificationIntent,
++                PendingIntent.FLAG_UPDATE_CURRENT
++            )
++        }
+         val title = String.format(getApplicationName())
+         val message = String.format(
+             "%s is currently running and the technician can see whatever is displayed on your screen",
+@@ -297,12 +321,8 @@
+         }
+     }
+ 
+-    /***
+-     *
+-     *
+-     */
+-
+     override fun onBackPressed() {
++        viewDataBinding.helloText.text = ("Back Pressed")//no i18n
+         if (!AssistSession.INSTANCE.isSessionAlive()) {
+             super.onBackPressed()
+         } else {
+@@ -313,9 +333,9 @@
+             viewDataBinding.startSession.isEnabled = true
+             viewDataBinding.closeSession.isEnabled = false
+             intent.putExtra("session_key", "")
+-            openSessionDialog()
++            viewDataBinding.helloText.append("\nSession Stopped")//no i18n
+             viewDataBinding.startSession.visibility = View.GONE
+-            finish()
++            returnToJoinSessionActivity()
+         }
+ 
+     }
+Index: .idea/.gitignore
+===================================================================
+diff --git a/.idea/.gitignore b/.idea/.gitignore
+new file mode 100644
+--- /dev/null	
++++ b/.idea/.gitignore	
+@@ -0,0 +1,3 @@
++# Default ignored files
++/shelf/
++/workspace.xml
+Index: .idea/kotlinc.xml
+===================================================================
+diff --git a/.idea/kotlinc.xml b/.idea/kotlinc.xml
+new file mode 100644
+--- /dev/null	
++++ b/.idea/kotlinc.xml	
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="KotlinJpsPluginSettings">
++    <option name="version" value="1.9.0" />
++  </component>
++</project>
+\ No newline at end of file
+Index: .idea/compiler.xml
+===================================================================
+diff --git a/.idea/compiler.xml b/.idea/compiler.xml
+new file mode 100644
+--- /dev/null	
++++ b/.idea/compiler.xml	
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="CompilerConfiguration">
++    <bytecodeTargetLevel target="17" />
++  </component>
++</project>
+\ No newline at end of file
+Index: .idea/.name
+===================================================================
+diff --git a/.idea/.name b/.idea/.name
+new file mode 100644
+--- /dev/null	
++++ b/.idea/.name	
+@@ -0,0 +1,1 @@
++Assist-Customer-Android-SDK-demo
+\ No newline at end of file
