@@ -10,6 +10,7 @@
         tools:ignore="ScopedStorage" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 
     <application
         android:name=".MainApplication"
@@ -46,6 +47,12 @@
             android:foregroundServiceType="mediaProjection"
             tools:targetApi="q" />
         <service android:name="com.zoho.assist.customer.service.FloatingHeadService" />
+        <service
+            android:name="com.zoho.unattendedaccess.connectivity.ConnectivityService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="dataSync"
+            android:stopWithTask="false"/>
     </application>
 
 </manifest>
