@@ -10,6 +10,7 @@ class MainApplication : AssistSDKApplication() {
         super.onCreate()
         AssistSession.INSTANCE.setContext(this)
         AssistSession.INSTANCE.setAuthToken("")
+        AssistSession.INSTANCE.enableServiceQueue(this,true)
 
     }
 
