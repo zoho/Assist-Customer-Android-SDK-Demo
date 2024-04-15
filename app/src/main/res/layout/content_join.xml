@@ -69,6 +69,40 @@
             <!--                android:layout_gravity="end"-->
             <!--                android:text="Ok" />-->
         </LinearLayout>
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            >
+            <Button
+                android:id="@+id/enrollButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Enroll"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/serviceQueueButton"
+                app:layout_constraintTop_toTopOf="parent"/>
+            <Button
+                android:id="@+id/serviceQueueButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Service Queue"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/enrollButton"
+                app:layout_constraintTop_toTopOf="parent"/>
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/ServiceRequestResult"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lines="3"
+                android:scrollbars="horizontal|vertical"
+                android:scrollbarStyle="insideInset"
+                android:hint="Result"
+                android:visibility="visible"
+                app:layout_constraintTop_toBottomOf="@id/enrollButton"
+                > </com.google.android.material.textfield.TextInputEditText>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <RadioGroup
             android:layout_width="fill_parent"
