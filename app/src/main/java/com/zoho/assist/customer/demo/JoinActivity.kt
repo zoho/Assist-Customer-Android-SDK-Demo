@@ -108,8 +108,6 @@ class JoinActivity : AppCompatActivity(), ServiceQueueCallBack,
         binding.contentLayoutId.serviceQueueButton.visibility = if(AssistSession.INSTANCE.isEnrolled(this)) View.VISIBLE else View.GONE
         binding.contentLayoutId.ServiceRequestResult.visibility = if(AssistSession.INSTANCE.isEnrolled(this)) View.VISIBLE else View.GONE
 
-        binding.contentLayoutId.sdkToken.setText("add here your SDK token")
-        AssistSession.INSTANCE.setAuthToken(binding.contentLayoutId.sdkToken.text.toString())
         AssistSession.serviceRequestStatus = this
 
         binding.contentLayoutId.enrollButton.setOnClickListener {
