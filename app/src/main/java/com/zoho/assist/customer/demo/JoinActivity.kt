@@ -28,7 +28,7 @@ import com.zoho.assist.customer.deviceregistration.unenrollment.UnenrollmentCall
 import com.zoho.assist.customer.listener.AddonAvailabilityCallback
 import com.zoho.unattendedaccess.connectivity.Request
 import com.zoho.unattendedaccess.connectivity.ServiceQueueCallBack
-import com.zoho.unattendedaccess.connectivity.ServiceQueueStatus
+import com.zoho.unattendedaccess.connectivity.ServiceQueueResponse
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -36,7 +36,7 @@ import java.lang.Exception
 import java.util.logging.Level
 
 class JoinActivity : AppCompatActivity(), ServiceQueueCallBack,
-    ServiceQueueStatus {
+    ServiceQueueResponse {
 
     companion object {
         const val SESSION_KEY = "Session_key"
@@ -104,11 +104,12 @@ class JoinActivity : AppCompatActivity(), ServiceQueueCallBack,
         }
 
         //Service Queue Code changes
+        AssistSession.INSTANCE.setAuthToken(binding.contentLayoutId.sdkToken.text.toString()) // Set your auth token here to enable some features
         binding.contentLayoutId.enrollButton.setText(if(AssistSession.INSTANCE.isEnrolled(this)) "Unenroll" else "Enroll")
         binding.contentLayoutId.serviceQueueButton.visibility = if(AssistSession.INSTANCE.isEnrolled(this)) View.VISIBLE else View.GONE
         binding.contentLayoutId.ServiceRequestResult.visibility = if(AssistSession.INSTANCE.isEnrolled(this)) View.VISIBLE else View.GONE
 
-        AssistSession.serviceRequestStatus = this
+        AssistSession.serviceQueueResponseCallback = this
 
         binding.contentLayoutId.enrollButton.setOnClickListener {
             try {
@@ -122,7 +123,7 @@ class JoinActivity : AppCompatActivity(), ServiceQueueCallBack,
         }
 
         binding.contentLayoutId.serviceQueueButton.setOnClickListener {
-            AssistSession.INSTANCE.requestServiceQueue("My description","My Company name", supportRequestCallBack = object : ServiceQueueCallBack {
+            AssistSession.INSTANCE.requestServiceQueue("description","Company", serviceQueueCallBack = object : ServiceQueueCallBack {
                 override fun requestResponse(request: Request) {
                     when(request){
                         Request.SUCCESS -> {
@@ -253,9 +254,9 @@ class JoinActivity : AppCompatActivity(), ServiceQueueCallBack,
         AssistSession.INSTANCE.checkAndStartSession()
         try {
             Handler(Looper.getMainLooper()).postDelayed({
-                binding.contentLayoutId.serviceQueueButton.isEnabled = !AssistSession.INSTANCE.hasActiveRequestQueue()
-                binding.fab.isEnabled = !AssistSession.INSTANCE.hasActiveRequestQueue()
-                updateRequestStatus(if(AssistSession.INSTANCE.hasActiveRequestQueue())"Previous request in queue"  else "No active request is available")
+                binding.contentLayoutId.serviceQueueButton.isEnabled = !AssistSession.INSTANCE.hasActiveServiceQueue()
+                binding.fab.isEnabled = !AssistSession.INSTANCE.hasActiveServiceQueue()
+                updateRequestStatus(if(AssistSession.INSTANCE.hasActiveServiceQueue())"Previous request in queue"  else "No active request is available")
             },1500L)
         }catch (ex:Exception){
             println("Resume : ${ex.message} ")
