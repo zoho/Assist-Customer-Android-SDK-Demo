@@ -104,6 +104,7 @@ class JoinActivity : AppCompatActivity(), ServiceQueueCallBack,
         }
 
         //Service Queue Code changes
+        binding.contentLayoutId.sdkToken.setText("OlyO55SENBUmnpF1K5fIjveyz0mjpadfj3ZAbq2whmDClHG3AB31SsNVM36eOZhzzP4coagKx/2gH5XfynmR5pqnVbqk/o0KeItwz2yAguFPVDkeB5ZbSGcuf7P6upypJUA=")
         AssistSession.INSTANCE.setAuthToken(binding.contentLayoutId.sdkToken.text.toString()) // Set your auth token here to enable some features
         binding.contentLayoutId.enrollButton.setText(if(AssistSession.INSTANCE.isEnrolled(this)) "Unenroll" else "Enroll")
         binding.contentLayoutId.serviceQueueButton.visibility = if(AssistSession.INSTANCE.isEnrolled(this)) View.VISIBLE else View.GONE
@@ -123,7 +124,7 @@ class JoinActivity : AppCompatActivity(), ServiceQueueCallBack,
         }
 
         binding.contentLayoutId.serviceQueueButton.setOnClickListener {
-            AssistSession.INSTANCE.requestServiceQueue("description","Company", serviceQueueCallBack = object : ServiceQueueCallBack {
+            AssistSession.INSTANCE.requestServiceQueue("Test","zoho", serviceQueueCallBack = object : ServiceQueueCallBack {
                 override fun requestResponse(request: Request) {
                     when(request){
                         Request.SUCCESS -> {
