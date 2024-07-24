@@ -164,7 +164,7 @@ class ISessionCallbacks(private val activity: Activity, private val binding: Act
      * Requesting the customer to trigger the addon download via playstore.
      */
     override fun onAddOnAvailableForDownload() {
-        AssistSession.INSTANCE.startAddon()
+//        AssistSession.INSTANCE.startAddon()
     }
 
     private fun returnToJoinSessionActivity() {
