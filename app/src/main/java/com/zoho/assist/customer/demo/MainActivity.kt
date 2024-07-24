@@ -36,10 +36,6 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,7 +61,6 @@ class MainActivity : AppCompatActivity() {
      */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        val ack = AssistSession.INSTANCE.onActivityResult(requestCode, resultCode, data)
         resetStartStopButtons()
         if (requestCode == 100) {
 
