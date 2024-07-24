@@ -2,7 +2,6 @@ package com.zoho.assist.customer.demo
 
 import android.app.Activity
 import android.content.Intent
-import android.view.View
 import android.widget.Toast
 import com.zoho.assist.customer.AssistSession
 import com.zoho.assist.customer.SessionCallbacks
@@ -10,6 +9,7 @@ import com.zoho.assist.customer.SessionStartFailure
 import com.zoho.assist.customer.demo.databinding.ActivityMainBinding
 import com.zoho.assist.customer.model.ChatModel
 import com.zoho.assist.customer.model.ParticipantState
+import java.util.logging.Level
 
 
 class ISessionCallbacks(private val activity: Activity, private val binding: ActivityMainBinding) :
@@ -36,6 +36,10 @@ class ISessionCallbacks(private val activity: Activity, private val binding: Act
                 returnToJoinSessionActivity()
             }
         }
+    }
+
+    override fun reconnectionLimitExceeded() {
+        Toast.makeText(activity,"Reconnection Limit reached",Toast.LENGTH_SHORT).show()
     }
 
     /**
@@ -158,6 +162,9 @@ class ISessionCallbacks(private val activity: Activity, private val binding: Act
      */
     override fun getClientName(): String? {
         return null
+    }
+
+    override fun logMsg(level: Level, msg: String) {
     }
 
     /**
