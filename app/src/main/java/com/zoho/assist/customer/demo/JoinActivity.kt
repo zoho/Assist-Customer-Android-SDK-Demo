@@ -23,16 +23,15 @@ import androidx.lifecycle.lifecycleScope
 import com.zoho.assist.customer.AssistSession
 import com.zoho.assist.customer.demo.databinding.ActivityJoinBinding
 import com.zoho.assist.customer.deviceregistration.enrollment.BaseUrl
-import com.zoho.assist.customer.deviceregistration.enrollment.EnrollmentCallback
-import com.zoho.assist.customer.deviceregistration.unenrollment.UnenrollmentCallback
 import com.zoho.assist.customer.listener.AddonAvailabilityCallback
 import com.zoho.unattendedaccess.connectivity.Request
 import com.zoho.unattendedaccess.connectivity.ServiceQueueCallBack
 import com.zoho.unattendedaccess.connectivity.ServiceQueueResponse
+import com.zoho.unattendedaccess.deviceregistration.enrollment.EnrollmentCallback
+import com.zoho.unattendedaccess.deviceregistration.unenrollment.UnEnrollmentCallback
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.lang.Exception
 import java.util.logging.Level
 
 class JoinActivity : AppCompatActivity(), ServiceQueueCallBack,
@@ -222,7 +221,7 @@ class JoinActivity : AppCompatActivity(), ServiceQueueCallBack,
         }
     }
     private val STORAGE_PERMISSION_CODE = 100
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
+     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == STORAGE_PERMISSION_CODE ) {
             var permission="Camera"
@@ -251,16 +250,19 @@ class JoinActivity : AppCompatActivity(), ServiceQueueCallBack,
     //Service Queue functions added
     override fun onResume() {
         super.onResume()
+        disableScreen()
         AssistSession.INSTANCE.checkAndStartSession()
         try {
             Handler(Looper.getMainLooper()).postDelayed({
+                enableScreen()
                 binding.contentLayoutId.serviceQueueButton.isEnabled = !AssistSession.INSTANCE.hasActiveServiceQueue()
                 binding.fab.isEnabled = !AssistSession.INSTANCE.hasActiveServiceQueue()
                 updateRequestStatus(if(AssistSession.INSTANCE.hasActiveServiceQueue())"Previous request in queue"  else "No active request is available")
-            },1500L)
+            },2500L)
         }catch (ex:Exception){
             println("Resume : ${ex.message} ")
             ex.printStackTrace()
+            enableScreen()
         }
     }
 
@@ -283,22 +285,22 @@ class JoinActivity : AppCompatActivity(), ServiceQueueCallBack,
     }
 
     private fun initUnEnroll(){
-        AssistSession.INSTANCE.unenroll(object : UnenrollmentCallback {
-            override fun onUnenrollmentSuccess() {
-                Toast.makeText(this@JoinActivity, "Unenrolled successfully", Toast.LENGTH_SHORT)
-                    .show()
-                binding.contentLayoutId.enrollButton.setText("Enroll")
-                binding.contentLayoutId.serviceQueueButton.visibility = View.GONE
-                binding.contentLayoutId.ServiceRequestResult.visibility = View.GONE
-            }
-
-            override fun onUnenrollmentFailure(exception: Exception) {
+        AssistSession.INSTANCE.unEnroll(object : UnEnrollmentCallback {
+            override fun onUnEnrollmentFailure(exception: Exception) {
                 Toast.makeText(
                     this@JoinActivity,
                     "Un-Enrollment failed : ${exception.message}",
                     Toast.LENGTH_SHORT
                 ).show()
                 exception.message?.let { it1 -> Log.w("UN_Enrollment", "exception : $it1") }
+            }
+
+            override fun onUnEnrollmentSuccess() {
+                Toast.makeText(this@JoinActivity, "Unenrolled successfully", Toast.LENGTH_SHORT)
+                    .show()
+                binding.contentLayoutId.enrollButton.setText("Enroll")
+                binding.contentLayoutId.serviceQueueButton.visibility = View.GONE
+                binding.contentLayoutId.ServiceRequestResult.visibility = View.GONE
             }
         })
     }
