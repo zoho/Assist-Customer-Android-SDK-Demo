@@ -78,7 +78,7 @@
                 android:id="@+id/enrollButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Enroll"
+                android:text="@string/app_enroll"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/serviceQueueButton"
                 app:layout_constraintTop_toTopOf="parent"/>
@@ -86,7 +86,7 @@
                 android:id="@+id/serviceQueueButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Service Queue"
+                android:text="@string/app_service_queue"
                 android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/enrollButton"
@@ -98,7 +98,7 @@
                 android:lines="3"
                 android:scrollbars="horizontal|vertical"
                 android:scrollbarStyle="insideInset"
-                android:hint="Result"
+                android:hint="@string/app_result"
                 android:visibility="visible"
                 app:layout_constraintTop_toBottomOf="@id/enrollButton"
                 > </com.google.android.material.textfield.TextInputEditText>

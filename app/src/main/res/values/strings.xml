@@ -2,4 +2,8 @@
     <string name="app_name">Assist-Customer-Android-SDK-Demo</string>
     <string name="send_a_message" tools:ignore="ExtraTranslation">Send a message</string>
     <string name="session_key">Session Key</string>
+    <string name="app_enroll" tools:ignore="ExtraTranslation">Enroll</string>
+    <string name="app_un_enroll" tools:ignore="ExtraTranslation">Un-Enroll</string>
+    <string name="app_service_queue" tools:ignore="ExtraTranslation">Service Queue</string>
+    <string name="app_result" tools:ignore="ExtraTranslation">Result</string>
 </resources>

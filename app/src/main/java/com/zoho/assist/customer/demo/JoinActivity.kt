@@ -273,7 +273,7 @@ class JoinActivity : AppCompatActivity(), ServiceQueueCallBack,
                     binding.contentLayoutId.serviceQueueButton.visibility = View.VISIBLE
                     binding.contentLayoutId.ServiceRequestResult.visibility = View.VISIBLE
                     binding.contentLayoutId.serviceQueueButton.isEnabled = true
-                    binding.contentLayoutId.enrollButton.setText("UnEnroll")
+                    binding.contentLayoutId.enrollButton.setText(resources.getString(R.string.app_un_enroll))
                     Toast.makeText(applicationContext,"Enrollment success.",Toast.LENGTH_SHORT).show()
                 }
 
@@ -298,7 +298,7 @@ class JoinActivity : AppCompatActivity(), ServiceQueueCallBack,
             override fun onUnEnrollmentSuccess() {
                 Toast.makeText(this@JoinActivity, "Unenrolled successfully", Toast.LENGTH_SHORT)
                     .show()
-                binding.contentLayoutId.enrollButton.setText("Enroll")
+                binding.contentLayoutId.enrollButton.setText(resources.getString(R.string.app_enroll))
                 binding.contentLayoutId.serviceQueueButton.visibility = View.GONE
                 binding.contentLayoutId.ServiceRequestResult.visibility = View.GONE
             }
