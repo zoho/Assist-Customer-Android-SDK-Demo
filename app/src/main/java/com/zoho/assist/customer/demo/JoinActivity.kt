@@ -109,6 +109,9 @@ class JoinActivity : AppCompatActivity(), ServiceQueueCallBack,
         binding.contentLayoutId.ServiceRequestResult.visibility = if(AssistSession.INSTANCE.isEnrolled(this)) View.VISIBLE else View.GONE
 
         AssistSession.serviceQueueResponseCallback = this
+        if(AssistSession.INSTANCE.isEnrolled(this)){
+            AssistSession.INSTANCE.checkAndStartSession()
+        }
 
         binding.contentLayoutId.enrollButton.setOnClickListener {
             try {
@@ -250,19 +253,21 @@ class JoinActivity : AppCompatActivity(), ServiceQueueCallBack,
     //Service Queue functions added
     override fun onResume() {
         super.onResume()
-        disableScreen()
-        AssistSession.INSTANCE.checkAndStartSession()
-        try {
-            Handler(Looper.getMainLooper()).postDelayed({
+        if(AssistSession.INSTANCE.isEnrolled(this)){
+            disableScreen()
+            try {
+                Handler(Looper.getMainLooper()).postDelayed({
+                    enableScreen()
+                    binding.fab.isEnabled = !AssistSession.INSTANCE.hasActiveServiceQueue()
+                    updateRequestStatus(if(AssistSession.INSTANCE.hasActiveServiceQueue())"Previous request in queue"  else "No active request is available")
+                    binding.contentLayoutId.serviceQueueButton.visibility = if(AssistSession.INSTANCE.isEnrolled(this)) View.VISIBLE else View.GONE
+                    binding.contentLayoutId.serviceQueueButton.isEnabled = !AssistSession.INSTANCE.hasActiveServiceQueue()
+                },2000L)
+            }catch (ex:Exception){
+                println("Resume : ${ex.message} ")
+                ex.printStackTrace()
                 enableScreen()
-                binding.contentLayoutId.serviceQueueButton.isEnabled = !AssistSession.INSTANCE.hasActiveServiceQueue()
-                binding.fab.isEnabled = !AssistSession.INSTANCE.hasActiveServiceQueue()
-                updateRequestStatus(if(AssistSession.INSTANCE.hasActiveServiceQueue())"Previous request in queue"  else "No active request is available")
-            },2500L)
-        }catch (ex:Exception){
-            println("Resume : ${ex.message} ")
-            ex.printStackTrace()
-            enableScreen()
+            }
         }
     }
 
@@ -334,6 +339,7 @@ class JoinActivity : AppCompatActivity(), ServiceQueueCallBack,
         CoroutineScope(Dispatchers.Main).launch{
             Toast.makeText(this@JoinActivity,"Your previous session has $reason",Toast.LENGTH_SHORT).show()
         }
+        binding.contentLayoutId.serviceQueueButton.visibility = View.VISIBLE
         binding.contentLayoutId.serviceQueueButton.isEnabled = true
     }
 
