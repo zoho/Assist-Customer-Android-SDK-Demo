@@ -183,7 +183,7 @@ class JoinActivity : AppCompatActivity(), ServiceQueueCallBack,
                     enableScreen()
                     binding.fab.isEnabled = !AssistSession.INSTANCE.hasActiveServiceQueue()
                     updateRequestStatus(if(AssistSession.INSTANCE.hasActiveServiceQueue())"Previous request in queue"  else "No active request is available")
-                    binding.contentLayoutId.serviceQueueButton.visibility = if(AssistSession.INSTANCE.isEnrolled(this)) View.VISIBLE else View.GONE
+                    binding.contentLayoutId.serviceQueueButton.visibility =  View.VISIBLE
                     binding.contentLayoutId.serviceQueueButton.isEnabled = !AssistSession.INSTANCE.hasActiveServiceQueue()
                 },2000L)
             }catch (ex:Exception){
@@ -201,6 +201,7 @@ class JoinActivity : AppCompatActivity(), ServiceQueueCallBack,
         binding.contentLayoutId.  sdkToken.isEnabled = false
         binding .fab.isEnabled = false
         binding.contentLayoutId.checkAddon.isEnabled = false
+        binding.contentLayoutId.serviceQueueButton.isEnabled = false
     }
 
     private fun enableScreen() {
@@ -208,6 +209,11 @@ class JoinActivity : AppCompatActivity(), ServiceQueueCallBack,
         binding.contentLayoutId. sdkToken.isEnabled = true
         binding. fab.isEnabled = true
         binding.contentLayoutId. checkAddon.isEnabled = true
+        if(AssistSession.INSTANCE.isEnrolled(this)){
+            binding.contentLayoutId.serviceQueueButton.visibility = View.VISIBLE
+            binding.contentLayoutId.serviceQueueButton.isEnabled = !AssistSession.INSTANCE.hasActiveServiceQueue()
+        }
+
     }
 
     private fun isMyServiceRunning(serviceClass: Class<*>): Boolean {
