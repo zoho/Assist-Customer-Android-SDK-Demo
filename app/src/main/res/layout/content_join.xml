@@ -30,6 +30,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
             android:hint="Token"
+            android:visibility="gone"
             tools:ignore="Deprecated"
             />
 
@@ -74,6 +75,18 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             >
+            <EditText
+                android:id="@+id/descriptionBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:hint="@string/app_description"
+                android:visibility="gone"
+                tools:ignore="Deprecated"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/enrollButton"
+                />
+
             <Button
                 android:id="@+id/enrollButton"
                 android:layout_width="wrap_content"
@@ -81,7 +94,7 @@
                 android:text="@string/app_enroll"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/serviceQueueButton"
-                app:layout_constraintTop_toTopOf="parent"/>
+                app:layout_constraintTop_toBottomOf="@id/descriptionBox"/>
             <Button
                 android:id="@+id/serviceQueueButton"
                 android:layout_width="wrap_content"
@@ -90,7 +103,7 @@
                 android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/enrollButton"
-                app:layout_constraintTop_toTopOf="parent"/>
+                app:layout_constraintTop_toBottomOf="@id/descriptionBox"/>
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/ServiceRequestResult"
                 android:layout_width="match_parent"

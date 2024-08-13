@@ -107,6 +107,7 @@ class JoinActivity : AppCompatActivity(), ServiceQueueCallBack,
         binding.contentLayoutId.enrollButton.setText(if(AssistSession.INSTANCE.isEnrolled(this)) "Unenroll" else "Enroll")
         binding.contentLayoutId.serviceQueueButton.visibility = if(AssistSession.INSTANCE.isEnrolled(this)) View.VISIBLE else View.GONE
         binding.contentLayoutId.ServiceRequestResult.visibility = if(AssistSession.INSTANCE.isEnrolled(this)) View.VISIBLE else View.GONE
+        binding.contentLayoutId.descriptionBox.visibility = if(AssistSession.INSTANCE.isEnrolled(this)) View.VISIBLE else View.GONE
 
         AssistSession.serviceQueueResponseCallback = this
         if(AssistSession.INSTANCE.isEnrolled(this)){
@@ -125,7 +126,9 @@ class JoinActivity : AppCompatActivity(), ServiceQueueCallBack,
         }
 
         binding.contentLayoutId.serviceQueueButton.setOnClickListener {
-            AssistSession.INSTANCE.requestServiceQueue("description","Company", serviceQueueCallBack = object : ServiceQueueCallBack {
+            if(binding.contentLayoutId.descriptionBox.text.toString().isNotEmpty() && binding.contentLayoutId.descriptionBox.text.toString().length<=500){
+
+            AssistSession.INSTANCE.requestServiceQueue(binding.contentLayoutId.descriptionBox.text.toString(),"zoho", serviceQueueCallBack = object : ServiceQueueCallBack {
                 override fun requestResponse(request: Request) {
                     when(request){
                         Request.SUCCESS -> {
@@ -163,7 +166,31 @@ class JoinActivity : AppCompatActivity(), ServiceQueueCallBack,
                 }
 
             })
+            }else{
+                if (binding.contentLayoutId.descriptionBox.text.isNullOrEmpty()){
+                    binding.contentLayoutId.descriptionBox.error = "Please enter the description"
+                }else if(binding.contentLayoutId.descriptionBox.text.toString().length>500){
+                    binding.contentLayoutId.descriptionBox.error = "Description should not exist 500"
+                }
+            }
 
+        }
+
+        if(AssistSession.INSTANCE.isEnrolled(this)){
+            disableScreen()
+            try {
+                Handler(Looper.getMainLooper()).postDelayed({
+                    enableScreen()
+                    binding.fab.isEnabled = !AssistSession.INSTANCE.hasActiveServiceQueue()
+                    updateRequestStatus(if(AssistSession.INSTANCE.hasActiveServiceQueue())"Previous request in queue"  else "No active request is available")
+                    binding.contentLayoutId.serviceQueueButton.visibility = if(AssistSession.INSTANCE.isEnrolled(this)) View.VISIBLE else View.GONE
+                    binding.contentLayoutId.serviceQueueButton.isEnabled = !AssistSession.INSTANCE.hasActiveServiceQueue()
+                },2000L)
+            }catch (ex:Exception){
+                println("Resume : ${ex.message} ")
+                ex.printStackTrace()
+                enableScreen()
+            }
         }
 
 
@@ -253,22 +280,7 @@ class JoinActivity : AppCompatActivity(), ServiceQueueCallBack,
     //Service Queue functions added
     override fun onResume() {
         super.onResume()
-        if(AssistSession.INSTANCE.isEnrolled(this)){
-            disableScreen()
-            try {
-                Handler(Looper.getMainLooper()).postDelayed({
-                    enableScreen()
-                    binding.fab.isEnabled = !AssistSession.INSTANCE.hasActiveServiceQueue()
-                    updateRequestStatus(if(AssistSession.INSTANCE.hasActiveServiceQueue())"Previous request in queue"  else "No active request is available")
-                    binding.contentLayoutId.serviceQueueButton.visibility = if(AssistSession.INSTANCE.isEnrolled(this)) View.VISIBLE else View.GONE
-                    binding.contentLayoutId.serviceQueueButton.isEnabled = !AssistSession.INSTANCE.hasActiveServiceQueue()
-                },2000L)
-            }catch (ex:Exception){
-                println("Resume : ${ex.message} ")
-                ex.printStackTrace()
-                enableScreen()
-            }
-        }
+
     }
 
     private fun initEnrollment(){
@@ -277,6 +289,7 @@ class JoinActivity : AppCompatActivity(), ServiceQueueCallBack,
                 override fun onEnrollmentSuccess() {
                     binding.contentLayoutId.serviceQueueButton.visibility = View.VISIBLE
                     binding.contentLayoutId.ServiceRequestResult.visibility = View.VISIBLE
+                    binding.contentLayoutId.descriptionBox.visibility = View.VISIBLE
                     binding.contentLayoutId.serviceQueueButton.isEnabled = true
                     binding.contentLayoutId.enrollButton.setText(resources.getString(R.string.app_un_enroll))
                     Toast.makeText(applicationContext,"Enrollment success.",Toast.LENGTH_SHORT).show()
@@ -306,6 +319,7 @@ class JoinActivity : AppCompatActivity(), ServiceQueueCallBack,
                 binding.contentLayoutId.enrollButton.setText(resources.getString(R.string.app_enroll))
                 binding.contentLayoutId.serviceQueueButton.visibility = View.GONE
                 binding.contentLayoutId.ServiceRequestResult.visibility = View.GONE
+                binding.contentLayoutId.descriptionBox.visibility = View.GONE
             }
         })
     }

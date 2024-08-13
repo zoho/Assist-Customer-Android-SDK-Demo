@@ -6,4 +6,5 @@
     <string name="app_un_enroll" tools:ignore="ExtraTranslation">Un-Enroll</string>
     <string name="app_service_queue" tools:ignore="ExtraTranslation">Service Queue</string>
     <string name="app_result" tools:ignore="ExtraTranslation">Result</string>
+    <string name="app_description" tools:ignore="ExtraTranslation">Description</string>
 </resources>
