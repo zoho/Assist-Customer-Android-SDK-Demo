@@ -9,7 +9,8 @@ class MainApplication : AssistSDKApplication() {
     override fun onCreate() {
         super.onCreate()
         AssistSession.INSTANCE.setContext(this)
-        AssistSession.INSTANCE.setAuthToken("")
+        AssistSession.INSTANCE.setAuthToken("") // Set your auth token here to enable some features
+
 
     }
 
