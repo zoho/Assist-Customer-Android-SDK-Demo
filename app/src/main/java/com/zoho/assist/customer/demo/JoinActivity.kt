@@ -12,13 +12,20 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.util.TypedValue
 import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.RadioGroup
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import com.zoho.assist.customer.AssistSession
 import com.zoho.assist.customer.demo.databinding.ActivityJoinBinding
@@ -46,8 +53,54 @@ class JoinActivity : AppCompatActivity(), ServiceQueueCallBack,
     var authToken=""
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        enableEdgeToEdge()
         binding= ActivityJoinBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        if (::binding.isInitialized) {
+            setToolbarProperties()
+            binding.root.let {
+                ViewCompat.setOnApplyWindowInsetsListener(it) { v: View, insets: WindowInsetsCompat ->
+                    val systemBar =
+                        insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout() or WindowInsetsCompat.Type.ime())
+                    val dp16 = TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP, 16f, resources.displayMetrics
+                    ).toInt()
+                    val dp30 = TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP, 30f, resources.displayMetrics
+                    ).toInt()
+                    val dp50 = TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP, 50f, resources.displayMetrics
+                    ).toInt()
+                    val dp80 = TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP, 80f, resources.displayMetrics
+                    ).toInt()
+                    binding.toolbar.updatePadding(
+                        left = systemBar.left,
+                        right = systemBar.right,
+                        top = systemBar.top+dp16,
+                        bottom = dp16
+                    )
+
+                    binding.contentLayoutId.layoutContainer.updatePadding(
+                        left =  systemBar.left+dp30,
+                        right = systemBar.right+dp30,
+                        bottom =  systemBar.bottom+dp30,
+                        top = dp30
+                    )
+
+                    binding.fab.apply {
+                        val params = layoutParams as? ViewGroup.MarginLayoutParams
+                        params?.setMargins(dp50, systemBar.top+dp80, systemBar.right+dp50, dp50)
+                        layoutParams = params
+                    }
+
+                    insets
+                }
+
+            }
+        }
 
         binding.contentLayoutId.sdkToken.setText(authToken)
         binding.contentLayoutId.sessionKey.setText("")
@@ -371,6 +424,16 @@ class JoinActivity : AppCompatActivity(), ServiceQueueCallBack,
             }
         }else{
             binding.contentLayoutId.sdkToken.error = "Please enter the AuthToken"
+        }
+    }
+
+    private fun setToolbarProperties() {
+        supportActionBar?.hide()
+        binding.toolbar?.let { toolbar ->
+            actionBar?.setHomeButtonEnabled(true)
+            actionBar?.setDisplayHomeAsUpEnabled(true)
+            actionBar?.setDisplayShowHomeEnabled(true)
+            toolbar.title = getString(R.string.app_name)
         }
     }
 
