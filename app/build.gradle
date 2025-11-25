@@ -47,7 +47,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
     implementation 'com.google.android.material:material:1.13.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
-    api 'com.zoho.assist:customer:1.8'
+    api 'com.zoho.assist:customer:1.8.2'
 
 //    testImplementation 'junit:junit:4.12'
 //    androidTestImplementation 'androidx.test.ext:junit:1.1.0'
