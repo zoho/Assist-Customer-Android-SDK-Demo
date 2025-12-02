@@ -343,6 +343,7 @@ class JoinActivity : AppCompatActivity(), ServiceQueueCallBack,
     }
 
     private fun initEnrollment(){
+            AssistSession.INSTANCE.setAuthToken(binding.contentLayoutId.sdkToken.text.toString())
             AssistSession.INSTANCE.enrollDevice(BaseUrl.COM, callback = object :
                 EnrollmentCallback {
                 override fun onEnrollmentSuccess() {
