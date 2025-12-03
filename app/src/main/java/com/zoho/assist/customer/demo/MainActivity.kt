@@ -8,9 +8,15 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.View
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModelProviders
@@ -39,6 +45,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        enableEdgeToEdge()
         viewDataBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         callback = ISessionCallbacks(this, viewDataBinding)
         /**
@@ -55,6 +63,21 @@ class MainActivity : AppCompatActivity() {
             .commit()
         onViewCreate(savedInstanceState)
         viewDataBinding.executePendingBindings()
+        if (::viewDataBinding.isInitialized) {
+            viewDataBinding.root.let {
+                ViewCompat.setOnApplyWindowInsetsListener(it) { v: View, insets: WindowInsetsCompat ->
+                    val systemBar =
+                        insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout() or WindowInsetsCompat.Type.ime())
+                    val dp8 = TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP, 8f, resources.displayMetrics
+                    ).toInt()
+                    viewDataBinding.mainContentView.updatePadding(left = systemBar.left, right = systemBar.right, top = systemBar.top, bottom = systemBar.bottom+dp8)
+                    chatFragemnt.rootView?.updatePadding()
+                    insets
+                }
+
+            }
+        }
     }
     /**
      *

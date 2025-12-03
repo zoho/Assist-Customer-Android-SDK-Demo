@@ -4,12 +4,7 @@ pluginManagement {
         google()
         mavenCentral()
         gradlePluginPortal()
-        jcenter()
         maven { url "https://maven.zohodl.com/"}
-//        maven {
-//            url = uri("https://plugins.gradle.org/m2/")
-//        }
-
     }
 }
 
@@ -19,12 +14,7 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         gradlePluginPortal()
-        jcenter()
         maven { url "https://maven.zohodl.com/"}
-//        maven {
-//            url = uri("https://plugins.gradle.org/m2/")
-//        }
-
     }
 }
 include ':app'
